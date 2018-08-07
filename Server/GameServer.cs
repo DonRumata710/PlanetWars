@@ -1,0 +1,109 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Net;
+using System.Net.Http;
+using System.Net.WebSockets;
+
+namespace Server
+{
+    class GameServer
+    {
+        public async void RunAsync(int size, string _ip = null)
+        {
+            rooms = new List<Room>(size);
+
+            if (_ip != null)
+                ip = "http://" + _ip + ":80/";
+
+
+            HttpListener listener = new HttpListener();
+            listener.Prefixes.Add(ip);
+            listener.Start();
+            Console.WriteLine("Listening...");
+
+            while (true)
+            {
+                HttpListenerContext listenerContext = await listener.GetContextAsync();
+
+                if (listenerContext.Request.IsWebSocketRequest)
+                {
+                    WebSocketResponce(listenerContext);
+                }
+                else
+                {
+                    HttpResponce(listenerContext);
+                }
+            }
+        }
+
+        private async void WebSocketResponce(HttpListenerContext listenerContext)
+        {
+            WebSocketContext webSocketContext = null;
+            try
+            {
+                webSocketContext = await listenerContext.AcceptWebSocketAsync(subProtocol: null);
+                Interlocked.Increment(ref count);
+                Console.WriteLine("Processed: {0}", count);
+            }
+            catch (Exception e)
+            {
+                listenerContext.Response.StatusCode = 500;
+                listenerContext.Response.Close();
+                Console.WriteLine("Exception: {0}", e);
+                return;
+            }
+
+            WebSocket webSocket = webSocketContext.WebSocket;
+
+            try
+            {
+                byte[] receiveBuffer = new byte[1024];
+
+                while (webSocket.State == WebSocketState.Open)
+                {
+                    WebSocketReceiveResult receiveResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(receiveBuffer), CancellationToken.None);
+
+                    if (receiveResult.MessageType == WebSocketMessageType.Close)
+                    {
+                        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+                    }
+                    else if (receiveResult.MessageType == WebSocketMessageType.Text)
+                    {
+                        await webSocket.CloseAsync(WebSocketCloseStatus.InvalidMessageType, "Cannot accept text frame", CancellationToken.None);
+                    }
+                    else
+                    {
+                        await webSocket.SendAsync(new ArraySegment<byte>(receiveBuffer, 0, receiveResult.Count), WebSocketMessageType.Binary, receiveResult.EndOfMessage, CancellationToken.None);
+                    }                    
+                }
+            }
+            catch (Exception e)
+            {
+                // Just log any exceptions to the console. Pretty much any exception that occurs when calling `SendAsync`/`ReceiveAsync`/`CloseAsync` is unrecoverable in that it will abort the connection and leave the `WebSocket` instance in an unusable state.
+                Console.WriteLine("Exception: {0}", e);
+            }
+            finally
+            {
+                // Clean up by disposing the WebSocket once it is closed/aborted.
+                if (webSocket != null)
+                    webSocket.Dispose();
+            }
+        }
+
+
+        private async void HttpResponce(HttpListenerContext listenerContext)
+        {
+            listenerContext.Response.StatusCode = 400;
+            listenerContext.Response.Close();
+        }
+
+
+        string ip = "http://127.0.0.1:80/";
+        List<Room> rooms;
+        Statistics stat;
+
+        private int count = 0;
+    }
+}
