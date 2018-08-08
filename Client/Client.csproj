@@ -69,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="GameWindow.html" />
+    <Content Include="Menu.css" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />

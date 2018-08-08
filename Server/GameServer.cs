@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Http;
 using System.Net.WebSockets;
+using System.IO;
 
 namespace Server
 {
@@ -93,16 +94,50 @@ namespace Server
         }
 
 
-        private async void HttpResponce(HttpListenerContext listenerContext)
+        private void HttpResponce(HttpListenerContext listenerContext)
         {
+            string page = listenerContext.Request.RawUrl;
+
+            ResourceManager manager = new ResourceManager();
+
+            if (page == "/main_page")
+            {
+                string response = manager.GetMainPage(rooms);
+
+                SendPage(listenerContext, response);
+            }
+            else if (page.Contains("room"))
+            {
+
+            }
+            else if (page.Contains("player"))
+            {
+
+            }
+            else if (page.Contains("css"))
+            {
+                SendPage(listenerContext, manager.LoadCss(page.Substring(1)));
+            }
+
             listenerContext.Response.StatusCode = 400;
             listenerContext.Response.Close();
         }
 
 
+        void SendPage(HttpListenerContext listenerContext, string page)
+        {
+            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(page);
+            listenerContext.Response.ContentLength64 = buffer.Length;
+            Stream output = listenerContext.Response.OutputStream;
+            output.Write(buffer, 0, buffer.Length);
+            output.Close();
+        }
+
+
         string ip = "http://127.0.0.1:80/";
         List<Room> rooms;
-        Statistics stat;
+        Dictionary<string, int> players = new Dictionary<string, int>();
+        Statistics stat = new Statistics();
 
         private int count = 0;
     }
