@@ -4,10 +4,15 @@
     <link rel="stylesheet" type="text/css" href="css/Menu.css" media="all" />
 </head>
 <body>
-    <div class="header"></div>
-    <div class="middle">
-        <div class="room_list"></div>
-        <div class="new_room_panel"></div>
+    <div id="header"></div>
+    <div id="middle">
+        <div id="room_list"></div>
+        <div id="new_room_panel">
+            Size: <input type="number" name="size" value="0" /><br />
+            Players <input type="number" name="players" value="0" /><br />
+            Planets <input type="number" name="planets" value="0" /><br />
+            <button name="create_room" onclick="createRoom()" disabled>Start</button>
+        </div>
     </div>
 </body>
 </html>

@@ -9,19 +9,19 @@ body {
     height: 100%;
 }
 
-.header {
+#header {
     background-color: #41474a;
     width: 100%;
     height: 48px;
 }
 
-.middle {
+#middle {
     width: 100%;
     height: calc(100% - 52px);
     display: flex;
 }
 
-.room_list {
+#room_list {
     background-color: #b9c1c9;
     width: 400px;
     max-width: 100%;
@@ -41,10 +41,26 @@ body {
     font-size: 24pt;
 }
 
-.new_room_panel {
-    width: 200px;
-    height: 160px;
+.room .text {
+    margin-top: auto;
+    margin-bottom: auto;
+    line-height: 40px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#new_room_panel {
+    width: 240px;
+    height: 100px;
     background-color: #808080;
     margin-left: 0;
     margin-right: auto;
+    padding: 10px;
+}
+
+button[name="create_room"] {
+    width: 60px;
+    height: 25px;
+    margin: auto;
 }
