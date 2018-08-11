@@ -96,27 +96,30 @@ namespace Server
 
         private void HttpResponce(HttpListenerContext listenerContext)
         {
-            string page = listenerContext.Request.RawUrl;
+            string page = listenerContext.Request.RawUrl.Substring(1);
 
             ResourceManager manager = new ResourceManager();
 
-            if (page == "/main_page")
+            if (page == "main_page")
             {
-                string response = manager.GetMainPage(rooms);
-
-                SendPage(listenerContext, response);
+                SendPage(listenerContext, manager.GetMainPage());
             }
-            else if (page.Contains("room"))
+            else if (page.Contains(".css") || page.Contains(".js") || page.Contains(".ico"))
             {
-
+                SendPage(listenerContext, manager.GetResourceFile(page));
             }
-            else if (page.Contains("player"))
+            else
             {
-
-            }
-            else if (page.Contains("css"))
-            {
-                SendPage(listenerContext, manager.LoadCss(page.Substring(1)));
+                string key = page.Substring(0, page.IndexOf('?'));
+                if (key == "room")
+                {
+                    SendPage(listenerContext, manager.GetRoomPage());
+                }
+                else if (key == "player")
+                {
+                    SendPage(listenerContext, manager.GetPlayerPage());
+                }
+                
             }
 
             listenerContext.Response.StatusCode = 400;

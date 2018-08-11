@@ -13,28 +13,32 @@ namespace Server
 {
     class ResourceManager
     {
-        public string GetMainPage(List<Room> room_list)
+        public string GetMainPage()
         {
-            Dictionary<Room, int> room_info = new Dictionary<Room, int>();
-
-            foreach(Room room in room_list)
-            {
-                ++room_info[room];
-            }
-
-            string main_page_string = File.ReadAllText("html/GameWindow.html");
-
-            HtmlParser parser = new HtmlParser();
-            IHtmlDocument main_page = parser.Parse(main_page_string);
-
-            //IElement element = main_page.GetElementById("room_list");
-            
-            return main_page.DocumentElement.OuterHtml;
+            return File.ReadAllText("html/GameWindow.html");
         }
 
-        public string LoadCss(string filename)
+        public string GetRoomPage()
         {
-            return File.ReadAllText(filename);
+            return File.ReadAllText("html/Room.html");
+        }
+
+        public string GetResourceFile(string filename)
+        {
+            try
+            {
+                return File.ReadAllText(filename);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception thrown {0} while file \"{1}\" opening", ex, filename);
+                return "";
+            }
+        }
+
+        public string GetPlayerPage()
+        {
+            return "";
         }
     }
 }
