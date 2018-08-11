@@ -26,15 +26,22 @@ namespace Server
 
             while (true)
             {
-                HttpListenerContext listenerContext = await listener.GetContextAsync();
+                try
+                {
+                    HttpListenerContext listenerContext = await listener.GetContextAsync();
 
-                if (listenerContext.Request.IsWebSocketRequest)
-                {
-                    WebSocketResponce(listenerContext);
+                    if (listenerContext.Request.IsWebSocketRequest)
+                    {
+                        WebSocketResponce(listenerContext);
+                    }
+                    else
+                    {
+                        HttpResponce(listenerContext);
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    HttpResponce(listenerContext);
+                    Console.WriteLine("Exception: {0}", e);
                 }
             }
         }
@@ -45,8 +52,7 @@ namespace Server
             try
             {
                 webSocketContext = await listenerContext.AcceptWebSocketAsync(subProtocol: null);
-                Interlocked.Increment(ref count);
-                Console.WriteLine("Processed: {0}", count);
+                stat.IncrementConnections();
             }
             catch (Exception e)
             {
@@ -57,37 +63,37 @@ namespace Server
             }
 
             WebSocket webSocket = webSocketContext.WebSocket;
+            string player_id = listenerContext.Request.RemoteEndPoint.ToString();
+            players.Add(player_id, new User(webSocket));
 
             try
             {
+                SendRoomInfo(webSocket);
+
                 byte[] receiveBuffer = new byte[1024];
+                WebSocketReceiveResult receiveResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(receiveBuffer), CancellationToken.None);
 
-                while (webSocket.State == WebSocketState.Open)
+                string[] parameters = System.Text.Encoding.Default.GetString(receiveBuffer).Split(new char[2]{ '=', ';' });
+
+                if (parameters[0] == "create")
                 {
-                    WebSocketReceiveResult receiveResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(receiveBuffer), CancellationToken.None);
+                    int room = stat.Rooms;
+                    stat.IncrementRoomCreations();
 
-                    if (receiveResult.MessageType == WebSocketMessageType.Close)
-                    {
-                        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
-                    }
-                    else if (receiveResult.MessageType == WebSocketMessageType.Text)
-                    {
-                        await webSocket.CloseAsync(WebSocketCloseStatus.InvalidMessageType, "Cannot accept text frame", CancellationToken.None);
-                    }
-                    else
-                    {
-                        await webSocket.SendAsync(new ArraySegment<byte>(receiveBuffer, 0, receiveResult.Count), WebSocketMessageType.Binary, receiveResult.EndOfMessage, CancellationToken.None);
-                    }                    
+                    rooms.Add(new Room(Int32.Parse(parameters[2]), Int32.Parse(parameters[4]), Int32.Parse(parameters[6])));
+                    rooms[rooms.Count - 1].AddPlayer(player_id, webSocket);
+                }
+                else
+                {
+                    rooms[Int32.Parse(parameters[0])].AddPlayer(player_id, webSocket);
                 }
             }
             catch (Exception e)
             {
-                // Just log any exceptions to the console. Pretty much any exception that occurs when calling `SendAsync`/`ReceiveAsync`/`CloseAsync` is unrecoverable in that it will abort the connection and leave the `WebSocket` instance in an unusable state.
                 Console.WriteLine("Exception: {0}", e);
             }
             finally
             {
-                // Clean up by disposing the WebSocket once it is closed/aborted.
                 if (webSocket != null)
                     webSocket.Dispose();
             }
@@ -135,13 +141,26 @@ namespace Server
             output.Write(buffer, 0, buffer.Length);
             output.Close();
         }
+        
+
+        async void SendRoomInfo(WebSocket webSocket)
+        {
+            string result = "";
+
+            foreach (Room room in rooms)
+            {
+                result += room.ToString();
+            }
+
+            byte[] roomInfo = System.Text.Encoding.UTF8.GetBytes(result);
+            if (roomInfo.Length > 0)
+                await webSocket.SendAsync(new ArraySegment<byte>(roomInfo, 0, roomInfo.Length), WebSocketMessageType.Binary, true, CancellationToken.None);
+        }
 
 
         string ip = "http://127.0.0.1:80/";
         List<Room> rooms;
-        Dictionary<string, int> players = new Dictionary<string, int>();
+        Dictionary<string, User> players = new Dictionary<string, User>();
         Statistics stat = new Statistics();
-
-        private int count = 0;
     }
 }

@@ -57,6 +57,7 @@
     <Compile Include="Room.cs" />
     <Compile Include="GameServer.cs" />
     <Compile Include="Statistics.cs" />
+    <Compile Include="User.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -72,6 +73,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>xcopy $(SolutionDir)Client\*.html .\html /I /S /Y
-xcopy $(SolutionDir)Client\*.css .\css /I /S /Y</PreBuildEvent>
+xcopy $(SolutionDir)Client\*.css .\css /I /S /Y
+xcopy $(SolutionDir)Client\*.js .\js /I /S /Y</PreBuildEvent>
   </PropertyGroup>
 </Project>
