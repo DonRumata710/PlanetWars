@@ -9,6 +9,10 @@ namespace Server
 {
     class Statistics
     {
+        static Statistics instance = new Statistics();
+
+        public static Statistics Instance { get { return instance; } }
+
         public void IncrementConnections()
         {
             Monitor.Enter(this);

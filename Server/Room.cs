@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Net.WebSockets;
+
 
 namespace Server
 {
@@ -17,29 +17,32 @@ namespace Server
             planets = _planets;
         }
 
-        public void AddPlayer(string name, WebSocket webSocket)
+        public void AddPlayer(User user)
         {
-            webSockets.Add(name, webSocket);
+            webSockets.Add(user);
         }
 
-        public void RemovePlayer(string name)
+        public void RemovePlayer(User user)
         {
-            webSockets.Remove(name);
+            webSockets.Remove(user);
         }
 
         public override string ToString()
         {
-            return String.Format("size={0};players={1};maxplayers={2}", size, players, maxPlayers);
+            return String.Format("size={0},players={1},maxplayers={2}", size, players, maxPlayers);
         }
 
-        Dictionary<string, WebSocket> webSockets = new Dictionary<string, WebSocket>();
+        public bool IsFull()
+        {
+            return maxPlayers == players;
+        }
+
+        List<User> webSockets = new List<User>();
 
         int size = 0;
         int planets = 0;
 
         int maxPlayers = 0;
         int players = 0;
-
-        int ai = 0;
     }
 }

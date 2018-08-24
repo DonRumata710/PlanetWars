@@ -68,11 +68,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Menu.js" />
+    <Content Include="GamePanel.html" />
+    <Content Include="GameLogic.js" />
     <Content Include="GameWindow.html" />
-    <Content Include="Menu.css" />
-    <Content Include="Room.css" />
-    <Content Include="Room.html" />
+    <Content Include="Styles.css" />
+    <Content Include="RoomListPanel.html" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />

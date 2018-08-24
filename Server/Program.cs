@@ -10,8 +10,8 @@ namespace Server
     {
         static void Main(string[] args)
         {
-            GameServer server = new GameServer();
-            server.RunAsync(1);
+            ConnectionManager server = new ConnectionManager();
+            server.Run(1);
 
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();

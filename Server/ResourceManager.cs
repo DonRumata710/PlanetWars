@@ -13,9 +13,17 @@ namespace Server
 {
     class ResourceManager
     {
+        static public string DocumentRootPath
+        {
+            get
+            {
+                return "html/GameWindow.html";
+            }
+        }
+
         public string GetMainPage()
         {
-            return File.ReadAllText("html/GameWindow.html");
+            return File.ReadAllText(DocumentRootPath);
         }
 
         public string GetRoomPage()
@@ -29,11 +37,15 @@ namespace Server
             {
                 return File.ReadAllText(filename);
             }
+            catch (FileNotFoundException)
+            {
+                Console.WriteLine("File {0} was not found", filename);
+            }
             catch (Exception ex)
             {
                 Console.WriteLine("Exception thrown {0} while file \"{1}\" opening", ex, filename);
-                return "";
             }
+            return "";
         }
 
         public string GetPlayerPage()
