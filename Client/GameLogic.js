@@ -73,6 +73,11 @@ function updateRoomList (data) {
 		room_fullness.textContent = "Players: " + players + "/" + maxplayers
 		room_div.appendChild(room_fullness)
 
+		var index = i
+		room_div.onclick = function () {
+			socket.send(index)
+		}
+
 		room_list_div.appendChild(room_div)
 	}
 }
