@@ -95,7 +95,6 @@ namespace Server
         public event Update RoomUpdate;
 
 
-        public Room GetRoom(int i) { return rooms[i]; }
         public void AddRoom(int i, int size, int maxPlayers, int planets)
         {
             Monitor.Enter(this);

@@ -49,7 +49,6 @@ namespace Server
                     Statistics.Instance.IncrementRoomCreations();
 
                     manager.AddRoom(room_index, Int32.Parse(parameters[2]), Int32.Parse(parameters[4]), Int32.Parse(parameters[6]));
-                    manager.GetRoom(room_index).AddPlayer(this);
                     manager.AddUserToRoom(room_index, this);
                 }
                 else
