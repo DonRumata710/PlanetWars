@@ -79,12 +79,12 @@ namespace Server
 
         public string CollectRoomInfo()
         {
-            string result = "rooms;";
+            string result = "rooms:";
             foreach (Room room in rooms.Values)
             {
                 if (room.IsFull())
                     continue;
-                result += room.ToString();
+                result += room.ToString() + ";";
             }
             return result;
         }

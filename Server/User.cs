@@ -29,12 +29,12 @@ namespace Server
 
         public void SendRoomInfo(string info)
         {
-            Send(info);
+            SafeSend(info);
         }
 
         public void SetRoomNumber(int num)
         {
-            Send(num.ToString());
+            SafeSend(num.ToString());
         }
 
         protected override void OnMessage(MessageEventArgs e)
@@ -60,6 +60,16 @@ namespace Server
 
                 SetRoomNumber(room_index);
             }
+        }
+
+        bool SafeSend(string data)
+        {
+            if (ConnectionState != DotNet.WebSocket.WebSocketState.Closed)
+            {
+                Send(data);
+                return true;
+            }
+            return false;
         }
 
 

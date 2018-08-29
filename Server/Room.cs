@@ -29,7 +29,7 @@ namespace Server
 
         public override string ToString()
         {
-            return String.Format("size={0},players={1},maxplayers={2}", size, players, maxPlayers);
+            return String.Format("size={0},players={1},maxplayers={2}", size, webSockets.Count, maxPlayers);
         }
 
         public bool IsFull()

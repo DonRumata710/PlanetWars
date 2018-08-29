@@ -26,8 +26,15 @@ function showInfo(element) {
 
 function updateRoomList (data) {
 	room_list_div.innerHTML = ""
-	var params = data.split(/[,=]/)
-	for (var room = 0; room < params.length - 1; room += room_params * 2) {
+
+	if (data.length === 0)
+		return
+
+	var rooms_desc = data.split(/[;]/)
+	for (var i = 0; i < rooms_desc.length; i += 1) {
+
+		if (rooms_desc[i].length === 0)
+			break
 
 		var room_div = document.createElement("div")
 		room_div.className = "room"
@@ -35,9 +42,11 @@ function updateRoomList (data) {
 		var players = 0
 		var maxplayers = 0
 
-		for (var param = 0; param < 3; param += 1) {
-			var param_name = params[room + param * 2]
-			var param_value = params[room + param * 2 + 1]
+		var params = rooms_desc[i].split(/[=,]/)
+		for (var j = 0; j < params.length + 1; j += 2) {
+
+			var param_name = params[j]
+			var param_value = params[j + 1]
 
 			if (param_name === "name") {
 				var room_name = document.createElement("div")
@@ -58,7 +67,7 @@ function updateRoomList (data) {
 				maxplayers = param_value
 			}
 		}
-		
+
 		var room_fullness = document.createElement("div")
 		room_fullness.className = "text"
 		room_fullness.textContent = "Players: " + players + "/" + maxplayers
@@ -100,7 +109,7 @@ function parseUpdates(event) {
 	if (data === "") {
 		room_list_div.innerHTML = ""
 	}
-	else if (data.slice(0, 6) === "rooms;") {
+	else if (data.slice(0, 6) === "rooms:") {
 		updateRoomList(data.slice(6))
 	}
 	else if (data.slice(0, 1) === "{") {
