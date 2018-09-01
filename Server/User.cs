@@ -49,15 +49,21 @@ namespace Server
                     Statistics.Instance.IncrementRoomCreations();
 
                     manager.AddRoom(room_index, Int32.Parse(parameters[2]), Int32.Parse(parameters[4]), Int32.Parse(parameters[6]));
-                    manager.AddUserToRoom(room_index, this);
+                    room = manager.AddUserToRoom(room_index, this);
+
                 }
                 else
                 {
                     room_index = Int32.Parse(parameters[0]);
-                    manager.AddUserToRoom(room_index, this);
+                    room = manager.AddUserToRoom(room_index, this);
                 }
 
                 SetRoomNumber(room_index);
+            }
+            else
+            {
+                if (e.Data == "getmap")
+                    SafeSend(room.GetMap());
             }
         }
 
@@ -77,5 +83,6 @@ namespace Server
 
         int room_index = -1;
         ConnectionManager manager;
+        Room room;
     }
 }

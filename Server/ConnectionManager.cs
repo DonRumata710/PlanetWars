@@ -44,9 +44,17 @@ namespace Server
             {
                 SendPage(e, manager.GetMainPage());
             }
-            else if (page.Contains(".css") || page.Contains(".js") || page.Contains(".ico"))
+            else if (page.Contains(".css") || page.Contains(".js") || page.Contains(".html"))
             {
-                SendPage(e, manager.GetResourceFile(page));
+                SendData(e, manager.GetResourceFile(page), "text");
+            }
+            else if (page.Contains(".ico"))
+            {
+                SendData(e, manager.GetResourceFile(page), "image/ico");
+            }
+            else if (page.Contains(".png"))
+            {
+                SendData(e, manager.GetResourceFile(page), "image/png");
             }
             else
             {
@@ -77,6 +85,17 @@ namespace Server
         }
 
 
+        void SendData(HttpRequestEventArgs listenerContext, byte[] data, string type)
+        {
+            listenerContext.Response.StatusCode = data.Length == 0 ? 404 : 200;
+            listenerContext.Response.ContentLength64 = data.Length;
+            listenerContext.Response.ContentType = type;
+            Stream output = listenerContext.Response.OutputStream;
+            output.Write(data, 0, data.Length);
+            output.Close();
+        }
+
+
         public string CollectRoomInfo()
         {
             string result = "rooms:";
@@ -84,7 +103,7 @@ namespace Server
             {
                 if (room.IsFull())
                     continue;
-                result += room.ToString() + ";";
+                result += room.ToString();
             }
             return result;
         }
@@ -95,20 +114,24 @@ namespace Server
         public event Update RoomUpdate;
 
 
-        public void AddRoom(int i, int size, int maxPlayers, int planets)
+        public Room AddRoom(int i, int size, int maxPlayers, int planets)
         {
             Monitor.Enter(this);
             rooms.Add(i, new Room(size, maxPlayers, planets));
             RoomUpdate(CollectRoomInfo());
             Monitor.Exit(this);
+
+            return rooms[i];
         }
 
-        public void AddUserToRoom(int i, User user)
+        public Room AddUserToRoom(int i, User user)
         {
             Monitor.Enter(this);
             rooms[i].AddPlayer(user);
             RoomUpdate(CollectRoomInfo());
             Monitor.Exit(this);
+
+            return rooms[i];
         }
 
 

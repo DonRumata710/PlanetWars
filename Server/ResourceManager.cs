@@ -31,11 +31,11 @@ namespace Server
             return File.ReadAllText("html/Room.html");
         }
 
-        public string GetResourceFile(string filename)
+        public byte[] GetResourceFile(string filename)
         {
             try
             {
-                return File.ReadAllText(filename);
+                return File.ReadAllBytes(filename);
             }
             catch (FileNotFoundException)
             {
@@ -45,7 +45,7 @@ namespace Server
             {
                 Console.WriteLine("Exception thrown {0} while file \"{1}\" opening", ex, filename);
             }
-            return "";
+            return new byte[] { };
         }
 
         public string GetPlayerPage()

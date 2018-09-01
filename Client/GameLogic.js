@@ -11,6 +11,17 @@ var input_elements
 var game_data
 
 
+function loadGameMap() {
+	var client = new XMLHttpRequest();
+	client.open('GET', '/html/GamePanel.html');
+	client.onreadystatechange = function () {
+		middle.innerHTML = client.responseText
+		socket.send("getmap")
+	}
+	client.send();
+}
+
+
 function generatePlanetImage() {
 	return "planetX.png"
 }
@@ -76,6 +87,7 @@ function updateRoomList (data) {
 		var index = i
 		room_div.onclick = function () {
 			socket.send(index)
+			loadGameMap()
 		}
 
 		room_list_div.appendChild(room_div)
@@ -151,4 +163,5 @@ function checkButton() {
 
 function createRoom() {
 	socket.send("create;size=" + input_elements[0].value + ";players=" + input_elements[1].value + ";planets=" + input_elements[2].value + ";");
+	loadGameMap()
 }

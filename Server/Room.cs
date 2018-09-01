@@ -14,7 +14,9 @@ namespace Server
         {
             size = _size;
             maxPlayers = _maxPlayers;
-            planets = _planets;
+            planets_count = _planets;
+
+            planets = new Dictionary<GameLogic.Coordinates, GameLogic.Planet>(planets_count);
         }
 
         public void AddPlayer(User user)
@@ -29,7 +31,7 @@ namespace Server
 
         public override string ToString()
         {
-            return String.Format("size={0},players={1},maxplayers={2}", size, webSockets.Count, maxPlayers);
+            return String.Format("size={0},players={1},maxplayers={2};", size, webSockets.Count, maxPlayers);
         }
 
         public bool IsFull()
@@ -37,10 +39,24 @@ namespace Server
             return maxPlayers == players;
         }
 
+
+
+        public string GetMap()
+        {
+            string description = "planets:";
+
+            foreach(GameLogic.Planet planet in planets.Values)
+                description += planet;
+
+            return description;
+        }
+
+
         List<User> webSockets = new List<User>();
+        private Dictionary<GameLogic.Coordinates, GameLogic.Planet> planets;
 
         int size = 0;
-        int planets = 0;
+        int planets_count = 0;
 
         int maxPlayers = 0;
         int players = 0;
