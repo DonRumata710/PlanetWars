@@ -44,9 +44,13 @@ namespace Server
             {
                 SendPage(e, manager.GetMainPage());
             }
-            else if (page.Contains(".css") || page.Contains(".js") || page.Contains(".html"))
+            else if (page.Contains(".js") || page.Contains(".html"))
             {
                 SendData(e, manager.GetResourceFile(page), "text");
+            }
+            else if (page.Contains(".css"))
+            {
+                SendData(e, manager.GetResourceFile(page), "text/css");
             }
             else if (page.Contains(".ico"))
             {
