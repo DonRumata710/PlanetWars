@@ -100,24 +100,28 @@ function updateRoomList (data) {
 
 function buildMap(data) {
 	room_list_div.hidden = true
-	document.getElementById("new_room_panel").hidden = true
 
 	game_data = JSON.parse(data)
 
-	var map = document.createElement("div")
-	map.className = "map"
-	middle.appendChild(map)
+	var map = document.getElementById("map")
 
-	for (var i = 0; i < game_data.planets.length; ++i) {
+	var i = 0
+	for (var planet_info in game_data) {
 		var cell = document.createElement("img")
-		cell.src = generatePlanetImage()
+		cell.src = '/png/' + generatePlanetImage()
 		cell.className = "cell"
 		cell.id = i.toString()
 		cell.click = showInfo
 
+		var coordinates = planet_info.split('-')
+
 		var style = cell.style
-		style.top = game_data.planets[i].y * 15
-		style.left = game_data.planets[i].x * 15
+		style.top = coordinates[1] * 60
+		style.left = coordinates[0] * 60
+		
+		map.appendChild(cell)
+
+		++i;
 	}
 }
 
@@ -132,8 +136,8 @@ function parseUpdates(event) {
 	else if (data.slice(0, 6) === "rooms:") {
 		updateRoomList(data.slice(6))
 	}
-	else if (data.slice(0, 1) === "{") {
-		buildMap(data)
+	else if (data.slice(0, 8) === "planets:") {
+		buildMap(data.slice(8))
 	}
 }
 
@@ -176,6 +180,6 @@ function checkButton() {
 
 
 function createRoom() {
-	socket.send("create;size=" + input_elements[0].value + ";players=" + input_elements[1].value + ";planets=" + input_elements[2].value + ";");
+	socket.send("create;size=" + size_sb.value + ";players=" + players_sb.value + ";planets=" + planets_sb.value + ";");
 	loadGameMap()
 }

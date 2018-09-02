@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Server.GameLogic
 {
@@ -10,6 +11,14 @@ namespace Server.GameLogic
     {
         public int x = -1;
         public int y = -1;
+
+        Coordinates() { }
+
+        public Coordinates (int _x, int _y)
+        {
+            x = _x;
+            y = _y;
+        }
 
         public class EqualityComparer : IEqualityComparer<Coordinates>
         {
@@ -22,6 +31,11 @@ namespace Server.GameLogic
             {
                 return a.x.GetHashCode() | a.y.GetHashCode();
             }
+        }
+
+        public override string ToString()
+        {
+            return x.ToString() + "-" + y.ToString();
         }
     }
 
@@ -39,11 +53,19 @@ namespace Server.GameLogic
                 + ",ci=" + civil_industry + ",s=" + sience + ";";
         }
 
+        [JsonProperty]
         int size = 0;
+
+        [JsonProperty]
         int military_industry = 0;
+
+        [JsonProperty]
         int civil_industry = 0;
+
+        [JsonProperty]
         int sience = 0;
 
+        [JsonProperty]
         int owner = -1;
     }
 }

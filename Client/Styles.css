@@ -76,6 +76,7 @@ button[name="create_room"] {
     width: 600px;
     height: 600px;
     background-image: url(/png/space.png);
+    position: relative;
 }
 
 #info_panel {
@@ -84,4 +85,6 @@ button[name="create_room"] {
 
 .cell {
     position: absolute;
+    width: 60px;
+    height: 60px;
 }

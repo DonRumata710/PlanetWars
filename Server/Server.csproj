@@ -52,6 +52,7 @@
     <Compile Include="Room.cs" />
     <Compile Include="ConnectionManager.cs" />
     <Compile Include="Statistics.cs" />
+    <Compile Include="ThreadSafeRandom.cs" />
     <Compile Include="User.cs" />
   </ItemGroup>
   <ItemGroup>

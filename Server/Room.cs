@@ -4,19 +4,32 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 
 namespace Server
 {
     class Room
     {
+        static ThreadSafeRandom rnd = new ThreadSafeRandom();
+
+
         public Room(int _size, int _maxPlayers, int _planets)
         {
             size = _size;
             maxPlayers = _maxPlayers;
-            planets_count = _planets;
 
-            planets = new Dictionary<GameLogic.Coordinates, GameLogic.Planet>(planets_count);
+            planets = new Dictionary<GameLogic.Coordinates, GameLogic.Planet>(_planets);
+
+            for (int i = 0; i < _planets; ++i)
+            {
+                GameLogic.Coordinates coord;
+                do
+                    coord = new GameLogic.Coordinates(rnd.Next(size), rnd.Next(size));
+                while (planets.ContainsKey(coord));
+                
+                planets.Add(coord, new GameLogic.Planet(rnd.Next(size) + 1));
+            }
         }
 
         public void AddPlayer(User user)
@@ -45,8 +58,7 @@ namespace Server
         {
             string description = "planets:";
 
-            foreach(GameLogic.Planet planet in planets.Values)
-                description += planet;
+            description += JsonConvert.SerializeObject(planets);
 
             return description;
         }
@@ -56,7 +68,6 @@ namespace Server
         private Dictionary<GameLogic.Coordinates, GameLogic.Planet> planets;
 
         int size = 0;
-        int planets_count = 0;
 
         int maxPlayers = 0;
         int players = 0;
