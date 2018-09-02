@@ -5,7 +5,10 @@ var room_params = 4
 
 var middle
 var room_list_div
-var input_elements
+
+var size_sb
+var players_sb
+var planets_sb
 
 
 var game_data
@@ -141,9 +144,17 @@ window.onload = function open() {
 
 	middle = document.getElementById("middle")
 	room_list_div = document.getElementById("room_list")
-	input_elements = document.getElementsByTagName("input")
-
+	var input_elements = document.getElementsByTagName("input")
+	
 	for (var i = 0; i < input_elements.length; ++i) {
+		var name = input_elements[i].getAttribute("name")
+		if (name === "size")
+			size_sb = input_elements[i]
+		else if (name === "planets")
+			planets_sb = input_elements[i]
+		else if (name === "players")
+			players_sb = input_elements[i]
+		
 		input_elements[i].onchange = checkButton
 	}
 
@@ -154,10 +165,13 @@ window.onload = function open() {
 function checkButton() {
 	var button_element = document.getElementsByName("create_room")[0]
 	button_element.disabled = false;
-	for (var i = 0; i < input_elements.length; ++i) {
-		if (input_elements[i].value <= 0)
-			button_element.disabled = true;
-	}
+
+	var size = size_sb.value
+	var planets = planets_sb.value
+	var players = players_sb.value
+
+	if (size < 6 || planets < 2 || players < 2 || size * size / 4 < planets || players > planets)
+		button_element.disabled = true
 }
 
 
