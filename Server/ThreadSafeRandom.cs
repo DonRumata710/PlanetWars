@@ -18,7 +18,7 @@ namespace Server
                 int seed;
                 lock (_global)
                 {
-                    seed = _global.Next();
+                    seed = _global.Next() | DateTime.Now.Millisecond;
                 }
                 _local = new Random(seed);
             }

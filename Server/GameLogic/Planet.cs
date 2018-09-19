@@ -53,6 +53,22 @@ namespace Server.GameLogic
                 + ",ci=" + civil_industry + ",s=" + sience + ";";
         }
 
+        public int GetOwner() => owner;
+
+        public string GetShortInfo()
+        {
+            string res = "{";
+
+            res += "\"owner\"=" + owner.ToString() + ",\"size\"=" + size.ToString();
+
+            return res + "}";
+        }
+
+        public void ChangeOwner(int newOwner)
+        {
+            owner = newOwner;
+        }
+
         [JsonProperty]
         int size = 0;
 

@@ -1,9 +1,14 @@
 ﻿
 var socket
+var user_id
 
 var room_params = 4
 
 var middle
+
+var room_list_markup
+var game_markup
+
 var room_list_div
 
 var size_sb
@@ -11,17 +16,54 @@ var players_sb
 var planets_sb
 
 
+var description
+var mil_sb
+var civ_sb
+var sience_sb
+
+
 var game_data
 
 
-function loadGameMap() {
-	var client = new XMLHttpRequest();
-	client.open('GET', '/html/GamePanel.html');
-	client.onreadystatechange = function () {
-		middle.innerHTML = client.responseText
-		socket.send("getmap")
+function loadMarkup() {
+	var main_page_request = new XMLHttpRequest()
+	main_page_request.open('GET', '/html/RoomListPanel.html');
+	main_page_request.onreadystatechange = function () {
+		if (main_page_request.readyState !== 4)
+			return
+		room_list_markup = main_page_request.responseText
 	}
-	client.send();
+	main_page_request.send()
+
+	var game_markup_request = new XMLHttpRequest()
+	game_markup_request.open('GET', '/html/GamePanel.html');
+	game_markup_request.onreadystatechange = function () {
+		if (game_markup_request.readyState !== 4)
+			return
+		game_markup = game_markup_request.responseText
+	}
+	game_markup_request.send()
+}
+
+
+
+function loadGameMap() {
+	middle.innerHTML = game_markup
+	socket.send("getmap")
+
+	var input_elements = document.getElementsByTagName("input")
+
+	for (var i = 0; i < input_elements.length; ++i) {
+		var name = input_elements[i].getAttribute("name")
+		if (name === "mil")
+			mil_sb = input_elements[i]
+		else if (name === "civ")
+			civ_sb = input_elements[i]
+		else if (name === "sience")
+			sience_sb = input_elements[i]
+	}
+
+	description = document.getElementById("description")
 }
 
 
@@ -33,8 +75,33 @@ function generatePlanetImage() {
 
 function showInfo(element) {
 	if (element.target.className === "cell") {
-	
+		var planet = game_data[element.target.id]
+
+		if (planet.owner !== user_id) {
+			description.innerHTML = "Planet<br /> " +
+				"Size: " + planet.size + "<br /> " +
+				"Owner: " + planet.owner
+
+			mil_sb.disabled = true
+			civ_sb.disabled = true
+			sience_sb.disabled = true
+			return
+		}
+
+		description.innerHTML = "Planet<br /> " +
+			"Size: " + planet.size + "<br /> " +
+			"Military industry: " + planet.military_industry + "<br />" +
+			"Civil industry: " + planet.civil_industry + "<br />" +
+			"Sience: " + planet.sience
+
+		mil_sb.disabled = false
+		civ_sb.disabled = false
+		sience_sb.disabled = false
 	}
+}
+
+
+function finance() {
 }
 
 
@@ -105,13 +172,12 @@ function buildMap(data) {
 
 	var map = document.getElementById("map")
 
-	var i = 0
 	for (var planet_info in game_data) {
 		var cell = document.createElement("img")
 		cell.src = '/png/' + generatePlanetImage()
 		cell.className = "cell"
-		cell.id = i.toString()
-		cell.click = showInfo
+		cell.id = planet_info
+		cell.onclick = showInfo
 
 		var coordinates = planet_info.split('-')
 
@@ -120,8 +186,6 @@ function buildMap(data) {
 		style.left = coordinates[0] * 60
 		
 		map.appendChild(cell)
-
-		++i;
 	}
 }
 
@@ -132,6 +196,9 @@ function parseUpdates(event) {
 
 	if (data === "") {
 		room_list_div.innerHTML = ""
+	}
+	else if (data.slice(0, 3) === "id:") {
+		user_id = Number(data.slice(3))
 	}
 	else if (data.slice(0, 6) === "rooms:") {
 		updateRoomList(data.slice(6))
@@ -145,6 +212,8 @@ function parseUpdates(event) {
 window.onload = function open() {
 	socket = new WebSocket("ws://" + window.location.hostname + "/auth")
 	socket.onmessage = parseUpdates
+
+	loadMarkup()
 
 	middle = document.getElementById("middle")
 	room_list_div = document.getElementById("room_list")

@@ -24,6 +24,8 @@ namespace Server
         {
             base.OnOpen();
 
+            id = Statistics.Instance.IncrementConnections();
+            SafeSend("id:" + id.ToString());
             SendRoomInfo(manager.CollectRoomInfo());
         }
 
@@ -63,7 +65,7 @@ namespace Server
             else
             {
                 if (e.Data == "getmap")
-                    SafeSend(room.GetMap());
+                    SafeSend(room.GetMap(-1));
             }
         }
 
@@ -81,6 +83,7 @@ namespace Server
         public string Name { get; set; }
 
 
+        int id = -1;
         int room_index = -1;
         ConnectionManager manager;
         Room room;

@@ -55,7 +55,7 @@ body {
 }
 
 .control_panel {
-    width: 240px;
+    width: 280px;
     background-color: #808080;
     margin-left: 0;
     margin-right: auto;
@@ -64,6 +64,11 @@ body {
 
 #new_room_panel {
     height: 100px;
+}
+
+input {
+    width: 100px;
+    margin-left: 5px;
 }
 
 button[name="create_room"] {
@@ -79,8 +84,13 @@ button[name="create_room"] {
     position: relative;
 }
 
-#info_panel {
+#game_panel {
     height: 580px;
+}
+
+.game_panel_part {
+    margin-bottom: 10px;
+    min-height: 100px;
 }
 
 .cell {

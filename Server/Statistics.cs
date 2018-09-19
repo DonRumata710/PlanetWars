@@ -13,24 +13,28 @@ namespace Server
 
         public static Statistics Instance { get { return instance; } }
 
-        public void IncrementConnections()
+        public int IncrementConnections()
         {
             Monitor.Enter(this);
-            ++connections;
-            Console.WriteLine("Processed connections: {0}", connections);
+            int result = Connections++;
+            Console.WriteLine("Processed connections: {0}", Connections);
             Monitor.Exit(this);
+
+            return result;
         }
 
-        public void IncrementRoomCreations()
+        public int IncrementRoomCreations()
         {
             Monitor.Enter(this);
-            ++Rooms;
+            int result = Rooms++;
             Console.WriteLine("Created rooms: {0}", Rooms);
             Monitor.Exit(this);
+
+            return result;
         }
 
         public int Rooms { get; private set; } = 0;
 
-        private int connections = 0;
+        public int Connections { get; private set; } = 0;
     }
 }

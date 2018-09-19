@@ -11,9 +11,6 @@ namespace Server
 {
     class Room
     {
-        static ThreadSafeRandom rnd = new ThreadSafeRandom();
-
-
         public Room(int _size, int _maxPlayers, int _planets)
         {
             size = _size;
@@ -21,6 +18,7 @@ namespace Server
 
             planets = new Dictionary<GameLogic.Coordinates, GameLogic.Planet>(_planets);
 
+            ThreadSafeRandom rnd = new ThreadSafeRandom();
             for (int i = 0; i < _planets; ++i)
             {
                 GameLogic.Coordinates coord;
@@ -29,6 +27,7 @@ namespace Server
                 while (planets.ContainsKey(coord));
                 
                 planets.Add(coord, new GameLogic.Planet(rnd.Next(size) + 1));
+                planets[coord].ChangeOwner(i);
             }
         }
 
@@ -54,13 +53,19 @@ namespace Server
 
 
 
-        public string GetMap()
+        public string GetMap(int player)
         {
-            string description = "planets:";
+            string description = "planets:{";
 
-            description += JsonConvert.SerializeObject(planets);
+            foreach (var planet in planets)
+            {
+                if (player == -1 || planet.Value.GetOwner() == player)
+                    description += "\"" + planet.Key + "\":" + JsonConvert.SerializeObject(planet.Value) + ",";
+                else
+                    description += "\"" + planet.Key + "\":" + planet.Value.GetShortInfo() + ",";
+            }
 
-            return description;
+            return description.Remove(description.Length - 1) + "}";
         }
 
 
