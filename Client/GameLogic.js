@@ -87,16 +87,17 @@ function showInfo(element) {
 			sience_sb.disabled = true
 			return
 		}
+		else {
+			description.innerHTML = "Planet<br /> " +
+				"Size: " + planet.size + "<br /> " +
+				"Military industry: " + planet.military_industry + "<br />" +
+				"Civil industry: " + planet.civil_industry + "<br />" +
+				"Sience: " + planet.sience
 
-		description.innerHTML = "Planet<br /> " +
-			"Size: " + planet.size + "<br /> " +
-			"Military industry: " + planet.military_industry + "<br />" +
-			"Civil industry: " + planet.civil_industry + "<br />" +
-			"Sience: " + planet.sience
-
-		mil_sb.disabled = false
-		civ_sb.disabled = false
-		sience_sb.disabled = false
+			mil_sb.disabled = false
+			civ_sb.disabled = false
+			sience_sb.disabled = false
+		}
 	}
 }
 

@@ -19,8 +19,7 @@ namespace Server
 
             if (_ip != null)
                 ip = "http://" + _ip + ":80/";
-
-
+            
             HttpServer server = new HttpServer("http://127.0.0.1:80");
             server.DocumentRootPath = ResourceManager.DocumentRootPath;
             server.OnGet += HttpResponce;
