@@ -40,7 +40,7 @@ namespace Server.GameLogic
     }
 
 
-    class Planet
+    public class Planet
     {
         public Planet(int _size)
         {
@@ -69,6 +69,14 @@ namespace Server.GameLogic
             owner = newOwner;
         }
 
+        public Fleet Guardians
+        {
+            get
+            {
+                return guardians;
+            }
+        }
+
         [JsonProperty]
         int size = 0;
 
@@ -83,5 +91,8 @@ namespace Server.GameLogic
 
         [JsonProperty]
         int owner = -1;
+
+        [JsonProperty]
+        Fleet guardians;
     }
 }
