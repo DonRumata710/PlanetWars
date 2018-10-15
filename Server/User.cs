@@ -65,7 +65,13 @@ namespace Server
             else
             {
                 if (e.Data == "getmap")
+                {
                     SafeSend(room.GetMap(-1));
+                }
+                else
+                {
+                    room.HandleUserCmd(e.Data);
+                }
             }
         }
 

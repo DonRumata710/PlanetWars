@@ -3,10 +3,11 @@
     <div id="description" class="game_panel_part"></div>
     <div id="investment">
         Investments<br />
-        military industry:<input type="number" name="mil" value="0" min="0" /><br />
-        civil industry:<input type="number" name="civ" value="0" min="0" /><br />
-        sience:<input type="number" name="sience" value="0" min="0" /><br />
+        military industry:<input type="number" name="mil" value="0" min="0" disabled /><br />
+        civil industry:<input type="number" name="civ" value="0" min="0" disabled /><br />
+        science:<input type="number" name="science" value="0" min="0" disabled /><br />
         <button name="finance" onclick="finance()" disabled>Finance</button>
     </div>
     <div id="commands"></div>
+    <button name="step" onclick="step()">Step</button>
 </div>

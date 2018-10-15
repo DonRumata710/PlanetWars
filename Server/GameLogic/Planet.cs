@@ -7,12 +7,10 @@ using Newtonsoft.Json;
 
 namespace Server.GameLogic
 {
-    class Coordinates
+    struct Coordinates
     {
-        public int x = -1;
-        public int y = -1;
-
-        Coordinates() { }
+        public int x;
+        public int y;
 
         public Coordinates (int _x, int _y)
         {
@@ -49,8 +47,8 @@ namespace Server.GameLogic
 
         public override string ToString()
         {
-            return "owner=" + owner.ToString() + "size=" + size.ToString() + ",mi=" + military_industry
-                + ",ci=" + civil_industry + ",s=" + sience + ";";
+            return "owner=" + owner.ToString() + "size=" + size.ToString() + ",mi=" + MilitaryIndustryLevel
+                + ",ci=" + CivilIndustryLevel + ",s=" + ScienceLevel + ";";
         }
 
         public int GetOwner() => owner;
@@ -69,6 +67,16 @@ namespace Server.GameLogic
             owner = newOwner;
         }
 
+
+        int BaseDevelopCost = 100;
+
+        public void Finance(int military_invest, int civil_invest, int science_invest)
+        {
+            military_industry += military_invest;
+            civil_industry += civil_invest;
+            science += science_invest;
+        }
+
         public Fleet Guardians
         {
             get
@@ -78,16 +86,40 @@ namespace Server.GameLogic
         }
 
         [JsonProperty]
+        int MilitaryIndustryLevel
+        {
+            get
+            {
+                return ((int)Math.Ceiling(Math.Log(military_industry))) + 1;
+            }
+        }
+
+        [JsonProperty]
+        int CivilIndustryLevel
+        {
+            get
+            {
+                return ((int)Math.Ceiling(Math.Log(civil_industry))) + 1;
+            }
+        }
+
+        [JsonProperty]
+        int ScienceLevel
+        {
+            get
+            {
+                return ((int)Math.Ceiling(Math.Log(science))) + 1;
+            }
+        }
+
+        [JsonProperty]
         int size = 0;
 
-        [JsonProperty]
-        int military_industry = 0;
+        double military_industry = 1.0;
 
-        [JsonProperty]
-        int civil_industry = 0;
+        double civil_industry = 1.0;
 
-        [JsonProperty]
-        int sience = 0;
+        double science = 1.0;
 
         [JsonProperty]
         int owner = -1;

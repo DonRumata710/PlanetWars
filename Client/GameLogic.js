@@ -23,6 +23,7 @@ var sience_sb
 
 
 var game_data
+var current_planet
 
 
 function loadMarkup() {
@@ -59,7 +60,7 @@ function loadGameMap() {
 			mil_sb = input_elements[i]
 		else if (name === "civ")
 			civ_sb = input_elements[i]
-		else if (name === "sience")
+		else if (name === "science")
 			sience_sb = input_elements[i]
 	}
 
@@ -74,35 +75,55 @@ function generatePlanetImage() {
 
 
 function showInfo(element) {
+	var input_elements = document.getElementsByTagName("button")
+	var finance_button
+	for (var i = 0; i < input_elements.length; ++i) {
+		var name = input_elements[i].getAttribute("name")
+		if (name === "finance") {
+			finance_button = input_elements[i]
+			break
+		}
+	}
+
 	if (element.target.className === "cell") {
-		var planet = game_data[element.target.id]
+		current_planet = element.target.id
+		var planet = game_data[current_planet]
 
 		if (planet.owner !== user_id) {
-			description.innerHTML = "Planet<br /> " +
+			description.innerHTML = "Planet " + element.target.id + "<br /> " +
 				"Size: " + planet.size + "<br /> " +
 				"Owner: " + planet.owner
 
 			mil_sb.disabled = true
 			civ_sb.disabled = true
 			sience_sb.disabled = true
+			finance_button.disabled = true
 			return
 		}
 		else {
-			description.innerHTML = "Planet<br /> " +
+			description.innerHTML = "Planet " + element.target.id + "<br /> " +
 				"Size: " + planet.size + "<br /> " +
-				"Military industry: " + planet.military_industry + "<br />" +
-				"Civil industry: " + planet.civil_industry + "<br />" +
-				"Sience: " + planet.sience
+				"Military industry: " + planet.MilitaryIndustryLevel + "<br />" +
+				"Civil industry: " + planet.CivilIndustryLevel + "<br />" +
+				"Science: " + planet.ScienceLevel
 
 			mil_sb.disabled = false
 			civ_sb.disabled = false
 			sience_sb.disabled = false
+			finance_button.disabled = false
+			return
 		}
 	}
 }
 
 
 function finance() {
+	socket.send("finance;planet=" + current_planet + ";mil=" + mil_sb.value + ";civ=" + civ_sb.value + ";science=" + sience_sb.value)
+}
+
+
+function step() {
+	socket.send("step")
 }
 
 
@@ -250,6 +271,6 @@ function checkButton() {
 
 
 function createRoom() {
-	socket.send("create;size=" + size_sb.value + ";players=" + players_sb.value + ";planets=" + planets_sb.value + ";");
+	socket.send("create;size=" + size_sb.value + ";players=" + players_sb.value + ";planets=" + planets_sb.value)
 	loadGameMap()
 }
