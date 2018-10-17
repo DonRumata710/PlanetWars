@@ -48,7 +48,7 @@ namespace Server
 
         public bool IsFull()
         {
-            return maxPlayers == players;
+            return maxPlayers == webSockets.Count;
         }
 
         public void HandleUserCmd(string cmd)
@@ -109,6 +109,5 @@ namespace Server
         int size = 0;
 
         int maxPlayers = 0;
-        int players = 0;
     }
 }
