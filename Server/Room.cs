@@ -11,8 +11,9 @@ namespace Server
 {
     class Room
     {
-        public Room(int _size, int _maxPlayers, int _planets)
+        public Room(int _id, int _size, int _maxPlayers, int _planets)
         {
+            id = _id;
             size = _size;
             maxPlayers = _maxPlayers;
 
@@ -34,11 +35,18 @@ namespace Server
         public void AddPlayer(User user)
         {
             webSockets.Add(user);
+
+            if (webSockets.Count == maxPlayers)
+            {
+                webSockets[current_player].StartStep();
+            }
         }
 
         public void RemovePlayer(User user)
         {
             webSockets.Remove(user);
+            if (webSockets.Count == 0 && GameFinish != null)
+                GameFinish(id);
         }
 
         public override string ToString()
@@ -67,7 +75,7 @@ namespace Server
                     {
                         planet = cmd_params[i + 1];
                     }
-                    else if(cmd_params[i] == "mil")
+                    else if (cmd_params[i] == "mil")
                     {
                         mil = Int32.Parse(cmd_params[i + 1]);
                     }
@@ -82,7 +90,14 @@ namespace Server
                 }
 
                 string[] coordinates = planet.Split(new char[] { '-' });
+
                 planets[new GameLogic.Coordinates(Int32.Parse(coordinates[0]), Int32.Parse(coordinates[1]))].Finance(mil, civ, science);
+            }
+            else if (cmd_params[0] == "step")
+            {
+                webSockets[current_player].StopStep();
+                current_player = (current_player + 1) % maxPlayers;
+                webSockets[current_player].StartStep();
             }
         }
 
@@ -103,11 +118,20 @@ namespace Server
         }
 
 
+        public delegate void Update(int id);
+
+        public event Update GameFinish;
+
+
         List<User> webSockets = new List<User>();
         private Dictionary<GameLogic.Coordinates, GameLogic.Planet> planets;
+
+        int id = -1;
 
         int size = 0;
 
         int maxPlayers = 0;
+
+        int current_player = 0;
     }
 }

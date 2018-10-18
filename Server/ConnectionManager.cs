@@ -120,11 +120,13 @@ namespace Server
         public Room AddRoom(int i, int size, int maxPlayers, int planets)
         {
             Monitor.Enter(this);
-            rooms.Add(i, new Room(size, maxPlayers, planets));
+            Room new_room = new Room(i, size, maxPlayers, planets);
+            rooms.Add(i, new_room);
             RoomUpdate(CollectRoomInfo());
             Monitor.Exit(this);
 
-            return rooms[i];
+            new_room.GameFinish += DestroyRoom;
+            return new_room;
         }
 
         public Room AddUserToRoom(int i, User user)
@@ -135,6 +137,13 @@ namespace Server
             Monitor.Exit(this);
 
             return rooms[i];
+        }
+
+        public void DestroyRoom(int room)
+        {
+            rooms.Remove(room);
+            RoomUpdate(CollectRoomInfo());
+            Console.WriteLine(String.Format("Room {0} was destroyed", room));
         }
 
 

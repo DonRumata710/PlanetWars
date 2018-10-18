@@ -1,13 +1,13 @@
 ﻿<div id="map"></div>
 <div id="game_panel" class="control_panel">
-    <div id="description" class="game_panel_part"></div>
-    <div id="investment">
+    <div id="description" class="game_panel_part" disabled></div>
+    <div id="investment" class="game_panel_part" disabled>
         Investments<br />
         military industry:<input type="number" name="mil" value="0" min="0" disabled /><br />
         civil industry:<input type="number" name="civ" value="0" min="0" disabled /><br />
         science:<input type="number" name="science" value="0" min="0" disabled /><br />
         <button name="finance" onclick="finance()" disabled>Finance</button>
     </div>
-    <div id="commands"></div>
-    <button name="step" onclick="step()">Step</button>
+    <div id="commands" class="game_panel_part" disabled></div>
+    <button name="step" onclick="step()" class="game_panel_part" disabled>Step</button>
 </div>

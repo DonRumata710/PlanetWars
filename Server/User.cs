@@ -29,6 +29,14 @@ namespace Server
             SendRoomInfo(manager.CollectRoomInfo());
         }
 
+        protected override void OnClose(CloseEventArgs e)
+        {
+            base.OnClose(e);
+
+            if (room != null)
+                room.RemovePlayer(this);
+        }
+
         public void SendRoomInfo(string info)
         {
             SafeSend(info);
@@ -37,6 +45,17 @@ namespace Server
         public void SetRoomNumber(int num)
         {
             SafeSend(num.ToString());
+        }
+
+        public void StartStep()
+        {
+            is_current = true;
+            SafeSend("turn");
+        }
+
+        public void StopStep()
+        {
+            is_current = false;
         }
 
         protected override void OnMessage(MessageEventArgs e)
@@ -93,5 +112,7 @@ namespace Server
         int room_index = -1;
         ConnectionManager manager;
         Room room;
+
+        bool is_current = false;
     }
 }

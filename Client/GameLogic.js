@@ -122,7 +122,17 @@ function finance() {
 }
 
 
+function startStep() {
+	Array.prototype.map.call(document.getElementById("game_panel").getElementsByClassName("game_panel_part"), function (element, index) {
+		element.disabled = false
+	})
+}
+
+
 function step() {
+	Array.prototype.map.call(document.getElementById("game_panel").getElementsByClassName("game_panel_part"), function (element, index) {
+		element.disabled = true
+	})
 	socket.send("step")
 }
 
@@ -221,6 +231,9 @@ function parseUpdates(event) {
 	}
 	else if (data.slice(0, 3) === "id:") {
 		user_id = Number(data.slice(3))
+	}
+	else if (data.slice(0, 4) === "turn") {
+		startStep()
 	}
 	else if (data.slice(0, 6) === "rooms:") {
 		updateRoomList(data.slice(6))
