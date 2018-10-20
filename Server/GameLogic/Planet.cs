@@ -35,40 +35,40 @@ namespace Server.GameLogic
         {
             return x.ToString() + "-" + y.ToString();
         }
+
+        static public double Distance(Coordinates first, Coordinates second)
+        {
+            double x = first.x - second.x;
+            double y = first.y - second.y;
+            return Math.Sqrt(x * x + y * y);
+        }
     }
 
 
     public class Planet
     {
-        public Planet(int _size)
+        public Planet(int _size, int owner)
         {
             size = _size;
+            Owner = owner;
+            Guardians = new Fleet(owner, this);
         }
 
         public override string ToString()
         {
-            return "owner=" + owner.ToString() + "size=" + size.ToString() + ",mi=" + MilitaryIndustryLevel
+            return "owner=" + Owner.ToString() + "size=" + size.ToString() + ",mi=" + MilitaryIndustryLevel
                 + ",ci=" + CivilIndustryLevel + ",s=" + ScienceLevel + ";";
         }
-
-        public int GetOwner() => owner;
 
         public string GetShortInfo()
         {
             string res = "{";
 
-            res += "\"owner\"=" + owner.ToString() + ",\"size\"=" + size.ToString();
+            res += "\"Owner\":" + Owner.ToString() + ",\"size\":" + size.ToString();
 
             return res + "}";
         }
 
-        public void ChangeOwner(int newOwner)
-        {
-            owner = newOwner;
-        }
-
-
-        int BaseDevelopCost = 100;
 
         public void Finance(int military_invest, int civil_invest, int science_invest)
         {
@@ -79,11 +79,29 @@ namespace Server.GameLogic
 
         public Fleet Guardians
         {
-            get
-            {
-                return guardians;
-            }
+            get;
+            private set;
         }
+
+        public void AppendArmy(Fleet fleet)
+        {
+            Guardians.Merge(fleet);
+        }
+
+        public void Occupate(Fleet occupator)
+        {
+            Guardians = occupator;
+            Owner = occupator.Owner;
+        }
+
+
+        public int prepareStep()
+        {
+            Guardians.AddShips((int)science, (int)military_industry * size);
+
+            return ((int)civil_industry) * size;
+        }
+
 
         [JsonProperty]
         int MilitaryIndustryLevel
@@ -113,6 +131,13 @@ namespace Server.GameLogic
         }
 
         [JsonProperty]
+        public int Owner
+        {
+            get;
+            private set;
+        }
+
+        [JsonProperty]
         int size = 0;
 
         double military_industry = 1.0;
@@ -120,11 +145,5 @@ namespace Server.GameLogic
         double civil_industry = 1.0;
 
         double science = 1.0;
-
-        [JsonProperty]
-        int owner = -1;
-
-        [JsonProperty]
-        Fleet guardians;
     }
 }

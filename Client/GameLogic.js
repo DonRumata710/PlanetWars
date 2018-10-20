@@ -16,6 +16,7 @@ var players_sb
 var planets_sb
 
 
+var resources
 var description
 var mil_sb
 var civ_sb
@@ -64,6 +65,7 @@ function loadGameMap() {
 			sience_sb = input_elements[i]
 	}
 
+	resources = document.getElementById("resources")
 	description = document.getElementById("description")
 }
 
@@ -89,10 +91,10 @@ function showInfo(element) {
 		current_planet = element.target.id
 		var planet = game_data[current_planet]
 
-		if (planet.owner !== user_id) {
+		if (planet.Owner !== user_id) {
 			description.innerHTML = "Planet " + element.target.id + "<br /> " +
 				"Size: " + planet.size + "<br /> " +
-				"Owner: " + planet.owner
+				"Owner: " + planet.Owner
 
 			mil_sb.disabled = true
 			civ_sb.disabled = true
@@ -122,7 +124,8 @@ function finance() {
 }
 
 
-function startStep() {
+function startStep(money) {
+	resources.innerHTML = "Money - " + money
 	Array.prototype.map.call(document.getElementById("game_panel").getElementsByClassName("game_panel_part"), function (element, index) {
 		element.disabled = false
 	})
@@ -232,14 +235,16 @@ function parseUpdates(event) {
 	else if (data.slice(0, 3) === "id:") {
 		user_id = Number(data.slice(3))
 	}
-	else if (data.slice(0, 4) === "turn") {
-		startStep()
+	else if (data.slice(0, 4) === "map:") {
+		buildMap(data.slice(4))
+	}
+	else if (data.slice(0, 5) === "turn:") {
+		var map_desc = data.indexOf("map")
+		buildMap(data.slice(map_desc + 4))
+		startStep(data.slice(5, map_desc))
 	}
 	else if (data.slice(0, 6) === "rooms:") {
 		updateRoomList(data.slice(6))
-	}
-	else if (data.slice(0, 8) === "planets:") {
-		buildMap(data.slice(8))
 	}
 }
 

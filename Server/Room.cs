@@ -27,8 +27,7 @@ namespace Server
                     coord = new GameLogic.Coordinates(rnd.Next(size), rnd.Next(size));
                 while (planets.ContainsKey(coord));
 
-                planets.Add(coord, new GameLogic.Planet(rnd.Next(size) + 1));
-                planets[coord].ChangeOwner(i);
+                planets.Add(coord, new GameLogic.Planet(rnd.Next(size) + 1, i));
             }
         }
 
@@ -38,7 +37,7 @@ namespace Server
 
             if (webSockets.Count == maxPlayers)
             {
-                webSockets[current_player].StartStep();
+                webSockets[current_player].StartStep(CalcPlanetIncome(current_player));
             }
         }
 
@@ -91,30 +90,56 @@ namespace Server
 
                 string[] coordinates = planet.Split(new char[] { '-' });
 
-                planets[new GameLogic.Coordinates(Int32.Parse(coordinates[0]), Int32.Parse(coordinates[1]))].Finance(mil, civ, science);
+                GetPlanet(Int32.Parse(coordinates[0]), Int32.Parse(coordinates[1])).Finance(mil, civ, science);
             }
             else if (cmd_params[0] == "step")
             {
                 webSockets[current_player].StopStep();
                 current_player = (current_player + 1) % maxPlayers;
-                webSockets[current_player].StartStep();
+
+                webSockets[current_player].StartStep(CalcPlanetIncome(current_player));
             }
         }
 
 
         public string GetMap(int player)
         {
-            string description = "planets:{";
+            string description = "map:{";
 
             foreach (var planet in planets)
             {
-                if (player == -1 || planet.Value.GetOwner() == player)
+                if (player == -1 || planet.Value.Owner == player)
                     description += "\"" + planet.Key + "\":" + JsonConvert.SerializeObject(planet.Value) + ",";
                 else
                     description += "\"" + planet.Key + "\":" + planet.Value.GetShortInfo() + ",";
             }
 
             return description.Remove(description.Length - 1) + "}";
+        }
+
+
+        private int CalcPlanetIncome(int player)
+        {
+            int totalIncome = 0;
+            foreach(var planet in planets)
+            {
+                if (planet.Value.Owner == player)
+                {
+                    totalIncome += planet.Value.prepareStep();
+                }
+            }
+            return totalIncome;
+        }
+
+
+        public GameLogic.Planet GetPlanet(int x, int y)
+        {
+            return GetPlanet(new GameLogic.Coordinates(x, y));
+        }
+
+        public GameLogic.Planet GetPlanet(GameLogic.Coordinates coords)
+        {
+            return planets[coords];
         }
 
 

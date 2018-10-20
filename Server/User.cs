@@ -9,6 +9,9 @@ using DotNet.WebSocket;
 using DotNet.WebSocket.Net;
 using DotNet.WebSocket.Server;
 
+using Server.GameLogic;
+
+using Newtonsoft.Json;
 
 namespace Server
 {
@@ -47,15 +50,29 @@ namespace Server
             SafeSend(num.ToString());
         }
 
-        public void StartStep()
+        public void StartStep(int new_money)
         {
+            foreach (Fleet fleet in fleets)
+                fleet.MakeStep();
+
+            money += new_money;
             is_current = true;
-            SafeSend("turn");
+
+            SafeSend("turn:" + money.ToString() + room.GetMap(id));
         }
 
         public void StopStep()
         {
             is_current = false;
+
+            for (int i = 0; i < fleets.Count; ++i)
+            {
+                if (fleets[i].IsEmpty())
+                {
+                    fleets.RemoveAt(i);
+                    --i;
+                }
+            }
         }
 
         protected override void OnMessage(MessageEventArgs e)
@@ -85,11 +102,36 @@ namespace Server
             {
                 if (e.Data == "getmap")
                 {
-                    SafeSend(room.GetMap(-1));
+                    SafeSend(room.GetMap(id));
                 }
-                else
+                else if (is_current)
                 {
-                    room.HandleUserCmd(e.Data);
+                    if (e.Data.StartsWith("move:"))
+                    {
+                        var values = e.Data.Substring(6).Split(new char[] { ':', '>' });
+                        Dictionary<int, int> new_fleet_ships = JsonConvert.DeserializeObject<Dictionary<int, int>>(values[0]);
+
+                        Coordinates start_coord = JsonConvert.DeserializeObject<Coordinates>(values[1]);
+                        Coordinates target_coord = JsonConvert.DeserializeObject<Coordinates>(values[2]);
+
+                        Planet place = room.GetPlanet(start_coord);
+                        Planet target = room.GetPlanet(target_coord);
+
+                        foreach (var ships in new_fleet_ships)
+                        {
+                            if (place.Guardians.GetShips(ships.Key) < ships.Value)
+                                return;
+                        }
+
+                        Fleet new_fleet = new Fleet(id, new_fleet_ships, target, Coordinates.Distance(start_coord, target_coord));
+
+                        foreach (var ships in new_fleet_ships)
+                            place.Guardians.RemoveShips(ships.Key, ships.Value);
+                    }
+                    else
+                    {
+                        room.HandleUserCmd(e.Data);
+                    }
                 }
             }
         }
@@ -112,6 +154,9 @@ namespace Server
         int room_index = -1;
         ConnectionManager manager;
         Room room;
+
+        List<Fleet> fleets = new List<Fleet>();
+        int money = 0;
 
         bool is_current = false;
     }

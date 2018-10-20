@@ -94,7 +94,14 @@ button[name="create_room"] {
 
 .game_panel_part {
     margin-bottom: 10px;
+}
+
+#description {
     min-height: 100px;
+}
+
+button.game_panel_part {
+    min-width: 100px;
 }
 
 .cell {
