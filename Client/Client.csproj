@@ -68,11 +68,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="FleetCreation.html" />
     <Content Include="GamePanel.html" />
     <Content Include="GameLogic.js" />
     <Content Include="GameWindow.html" />
     <Content Include="Styles.css" />
     <Content Include="RoomListPanel.html" />
+    <Content Include="util.js" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />

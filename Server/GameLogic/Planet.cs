@@ -12,6 +12,17 @@ namespace Server.GameLogic
         public int x;
         public int y;
 
+        public static Coordinates Parse(string str)
+        {
+            string[] coords = str.Split('-');
+
+            Coordinates res = new Coordinates();
+            res.x = Int32.Parse(coords[0]);
+            res.y = Int32.Parse(coords[1]);
+
+            return res;
+        }
+
         public Coordinates (int _x, int _y)
         {
             x = _x;

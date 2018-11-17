@@ -109,11 +109,15 @@ namespace Server
                 {
                     if (e.Data.StartsWith("move:"))
                     {
-                        var values = e.Data.Substring(6).Split(new char[] { ':', '>' });
+                        var values = e.Data.Substring(5).Split(new char[] { ';', '>' });
+
+                        if (values[1] == values[2])
+                            return;
+
                         Dictionary<int, int> new_fleet_ships = JsonConvert.DeserializeObject<Dictionary<int, int>>(values[0]);
 
-                        Coordinates start_coord = JsonConvert.DeserializeObject<Coordinates>(values[1]);
-                        Coordinates target_coord = JsonConvert.DeserializeObject<Coordinates>(values[2]);
+                        Coordinates start_coord = Coordinates.Parse(values[1]);
+                        Coordinates target_coord = Coordinates.Parse(values[2]);
 
                         Planet place = room.GetPlanet(start_coord);
                         Planet target = room.GetPlanet(target_coord);
