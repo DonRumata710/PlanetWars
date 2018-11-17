@@ -11,6 +11,7 @@ var game_markup
 
 var room_list_div
 
+var room_name_le
 var size_sb
 var players_sb
 var planets_sb
@@ -157,6 +158,7 @@ function updateRoomList (data) {
 
 		var players = 0
 		var maxplayers = 0
+		var roomname = ""
 
 		var params = rooms_desc[i].split(/[=,]/)
 		for (var j = 0; j < params.length + 1; j += 2) {
@@ -169,6 +171,8 @@ function updateRoomList (data) {
 				room_name.className = "text"
 				room_name.textContent = param_value
 				room_div.appendChild(room_name)
+
+				roomname = param_value
 			}
 			else if (param_name === "size") {
 				var room_size = document.createElement("div")
@@ -189,7 +193,7 @@ function updateRoomList (data) {
 		room_fullness.textContent = "Players: " + players + "/" + maxplayers
 		room_div.appendChild(room_fullness)
 
-		var index = i
+		var index = roomname
 		room_div.onclick = function () {
 			socket.send(index)
 			loadGameMap()
@@ -261,7 +265,9 @@ window.onload = function open() {
 	
 	for (var i = 0; i < input_elements.length; ++i) {
 		var name = input_elements[i].getAttribute("name")
-		if (name === "size")
+		if (name === "name")
+			room_name_le = input_elements[i]
+		else if (name === "size")
 			size_sb = input_elements[i]
 		else if (name === "planets")
 			planets_sb = input_elements[i]
@@ -269,6 +275,7 @@ window.onload = function open() {
 			players_sb = input_elements[i]
 		
 		input_elements[i].onchange = checkButton
+		input_elements[i].oninput = checkButton
 	}
 
 	checkButton()
@@ -283,12 +290,12 @@ function checkButton() {
 	var planets = planets_sb.value
 	var players = players_sb.value
 
-	if (size < 6 || planets < 2 || players < 2 || size * size / 4 < planets || players > planets)
+	if (room_name_le.value === "" || size < 6 || planets < 2 || players < 2 || size * size / 4 < planets || players > planets)
 		button_element.disabled = true
 }
 
 
 function createRoom() {
-	socket.send("create;size=" + size_sb.value + ";players=" + players_sb.value + ";planets=" + planets_sb.value)
+	socket.send("create;name=" + room_name_le.value + ";size=" + size_sb.value + ";players=" + players_sb.value + ";planets=" + planets_sb.value)
 	loadGameMap()
 }

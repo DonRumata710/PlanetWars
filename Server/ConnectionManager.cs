@@ -15,7 +15,7 @@ namespace Server
     {
         public void Run(int size, string _ip = null)
         {
-            rooms = new Dictionary<int, Room>(size);
+            rooms = new Dictionary<string, Room>(size);
 
             if (_ip != null)
                 ip = "http://" + _ip + ":80/";
@@ -117,11 +117,11 @@ namespace Server
         public event Update RoomUpdate;
 
 
-        public Room AddRoom(int i, int size, int maxPlayers, int planets)
+        public Room AddRoom(string name, int size, int maxPlayers, int planets)
         {
             Monitor.Enter(this);
-            Room new_room = new Room(i, size, maxPlayers, planets);
-            rooms.Add(i, new_room);
+            Room new_room = new Room(name, size, maxPlayers, planets);
+            rooms.Add(name, new_room);
             RoomUpdate(CollectRoomInfo());
             Monitor.Exit(this);
 
@@ -129,17 +129,17 @@ namespace Server
             return new_room;
         }
 
-        public Room AddUserToRoom(int i, User user)
+        public Room AddUserToRoom(string name, User user)
         {
             Monitor.Enter(this);
-            rooms[i].AddPlayer(user);
+            rooms[name].AddPlayer(user);
             RoomUpdate(CollectRoomInfo());
             Monitor.Exit(this);
 
-            return rooms[i];
+            return rooms[name];
         }
 
-        public void DestroyRoom(int room)
+        public void DestroyRoom(string room)
         {
             rooms.Remove(room);
             RoomUpdate(CollectRoomInfo());
@@ -148,7 +148,7 @@ namespace Server
 
 
         string ip = "http://127.0.0.1:80/";
-        Dictionary<int, Room> rooms;
+        Dictionary<string, Room> rooms;
         Dictionary<string, User> players = new Dictionary<string, User>();
         Statistics stat = new Statistics();
     }

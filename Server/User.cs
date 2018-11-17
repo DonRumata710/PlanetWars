@@ -45,9 +45,9 @@ namespace Server
             SafeSend(info);
         }
 
-        public void SetRoomNumber(int num)
+        public void SetRoomName(string name)
         {
-            SafeSend(num.ToString());
+            SafeSend("room:" + name);
         }
 
         public void StartStep(int new_money)
@@ -77,26 +77,26 @@ namespace Server
 
         protected override void OnMessage(MessageEventArgs e)
         {
-            if (room_index == -1)
+            if (room_name.IsNullOrEmpty())
             {
                 string[] parameters = e.Data.Split(new char[2] { '=', ';' });
 
                 if (parameters[0] == "create")
                 {
-                    room_index = Statistics.Instance.Rooms;
+                    room_name = parameters[2];
                     Statistics.Instance.IncrementRoomCreations();
 
-                    manager.AddRoom(room_index, Int32.Parse(parameters[2]), Int32.Parse(parameters[4]), Int32.Parse(parameters[6]));
-                    room = manager.AddUserToRoom(room_index, this);
+                    manager.AddRoom(parameters[2], Int32.Parse(parameters[4]), Int32.Parse(parameters[6]), Int32.Parse(parameters[8]));
+                    room = manager.AddUserToRoom(parameters[2], this);
 
                 }
                 else
                 {
-                    room_index = Int32.Parse(parameters[0]);
-                    room = manager.AddUserToRoom(room_index, this);
+                    room_name = parameters[0];
+                    room = manager.AddUserToRoom(parameters[0], this);
                 }
 
-                SetRoomNumber(room_index);
+                SetRoomName(room_name);
             }
             else
             {
@@ -151,7 +151,7 @@ namespace Server
 
 
         int id = -1;
-        int room_index = -1;
+        string room_name = "";
         ConnectionManager manager;
         Room room;
 

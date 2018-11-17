@@ -11,9 +11,9 @@ namespace Server
 {
     class Room
     {
-        public Room(int _id, int _size, int _maxPlayers, int _planets)
+        public Room(string _name, int _size, int _maxPlayers, int _planets)
         {
-            id = _id;
+            name = _name;
             size = _size;
             maxPlayers = _maxPlayers;
 
@@ -45,12 +45,12 @@ namespace Server
         {
             webSockets.Remove(user);
             if (webSockets.Count == 0 && GameFinish != null)
-                GameFinish(id);
+                GameFinish(name);
         }
 
         public override string ToString()
         {
-            return String.Format("size={0},players={1},maxplayers={2};", size, webSockets.Count, maxPlayers);
+            return String.Format("name={0},size={1},players={2},maxplayers={3};", name, size, webSockets.Count, maxPlayers);
         }
 
         public bool IsFull()
@@ -143,7 +143,7 @@ namespace Server
         }
 
 
-        public delegate void Update(int id);
+        public delegate void Update(string name);
 
         public event Update GameFinish;
 
@@ -151,7 +151,7 @@ namespace Server
         List<User> webSockets = new List<User>();
         private Dictionary<GameLogic.Coordinates, GameLogic.Planet> planets;
 
-        int id = -1;
+        string name = "";
 
         int size = 0;
 
