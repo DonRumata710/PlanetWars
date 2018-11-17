@@ -26,18 +26,13 @@ namespace Server
         protected override void OnOpen()
         {
             base.OnOpen();
-
-            id = Statistics.Instance.IncrementConnections();
-            SafeSend("id:" + id.ToString());
             SendRoomInfo(manager.CollectRoomInfo());
         }
 
         protected override void OnClose(CloseEventArgs e)
         {
             base.OnClose(e);
-
-            if (room != null)
-                room.RemovePlayer(this);
+            LeaveRoom();
         }
 
         public void SendRoomInfo(string info)
@@ -87,15 +82,16 @@ namespace Server
                     Statistics.Instance.IncrementRoomCreations();
 
                     manager.AddRoom(parameters[2], Int32.Parse(parameters[4]), Int32.Parse(parameters[6]), Int32.Parse(parameters[8]));
-                    room = manager.AddUserToRoom(parameters[2], this);
-
                 }
                 else
                 {
                     room_name = parameters[0];
-                    room = manager.AddUserToRoom(parameters[0], this);
                 }
 
+                room = manager.AddUserToRoom(room_name, this);
+                id = room.GetId(this);
+
+                SafeSend("id:" + id.ToString());
                 SetRoomName(room_name);
             }
             else
@@ -103,6 +99,11 @@ namespace Server
                 if (e.Data == "getmap")
                 {
                     SafeSend(room.GetMap(id));
+                }
+                else if (e.Data == "quit")
+                {
+                    LeaveRoom();
+                    SendRoomInfo(manager.CollectRoomInfo());
                 }
                 else if (is_current)
                 {
@@ -147,10 +148,20 @@ namespace Server
         }
 
 
+        private void LeaveRoom()
+        {
+            if (room != null)
+                room.RemovePlayer(this);
+
+            id = -1;
+        }
+
+
         public string Name { get; set; }
+        public int PlayerId { get { return id; } }
 
 
-        int id = -1;
+        private int id = -1;
         string room_name = "";
         ConnectionManager manager;
         Room room;

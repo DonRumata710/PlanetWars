@@ -48,6 +48,16 @@ namespace Server
                 GameFinish(name);
         }
 
+        public int GetId(User user)
+        {
+            for (int i = 0; i < webSockets.Count; ++i)
+            {
+                if (user == webSockets[i])
+                    return i;
+            }
+            return -1;
+        }
+
         public override string ToString()
         {
             return String.Format("name={0},size={1},players={2},maxplayers={3};", name, size, webSockets.Count, maxPlayers);
