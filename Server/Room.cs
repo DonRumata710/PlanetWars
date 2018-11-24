@@ -6,10 +6,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
+using Server.GameLogic;
+
 
 namespace Server
 {
-    class Room
+    public class Room
     {
         public Room(string _name, int _size, int _maxPlayers, int _planets)
         {
@@ -31,28 +33,30 @@ namespace Server
             }
         }
 
-        public void AddPlayer(User user)
+        public int AddPlayer(Player player)
         {
-            webSockets.Add(user);
+            players.Add(player);
 
-            if (webSockets.Count == maxPlayers)
+            if (players.Count == maxPlayers)
             {
-                webSockets[current_player].StartStep(CalcPlanetIncome(current_player));
+                players[current_player].StartStep(CalcPlanetIncome(current_player));
             }
+
+            return players.Count - 1;
         }
 
-        public void RemovePlayer(User user)
+        public void RemovePlayer(Player player)
         {
-            webSockets.Remove(user);
-            if (webSockets.Count == 0 && GameFinish != null)
+            players.Remove(player);
+            if (players.Count == 0 && GameFinish != null)
                 GameFinish(name);
         }
 
-        public int GetId(User user)
+        public int GetId(Player player)
         {
-            for (int i = 0; i < webSockets.Count; ++i)
+            for (int i = 0; i < players.Count; ++i)
             {
-                if (user == webSockets[i])
+                if (player == players[i])
                     return i;
             }
             return -1;
@@ -60,12 +64,12 @@ namespace Server
 
         public override string ToString()
         {
-            return String.Format("name={0},size={1},players={2},maxplayers={3};", name, size, webSockets.Count, maxPlayers);
+            return String.Format("name={0},size={1},players={2},maxplayers={3};", name, size, players.Count, maxPlayers);
         }
 
         public bool IsFull()
         {
-            return maxPlayers == webSockets.Count;
+            return maxPlayers == players.Count;
         }
 
         public void HandleUserCmd(string cmd)
@@ -104,10 +108,10 @@ namespace Server
             }
             else if (cmd_params[0] == "step")
             {
-                webSockets[current_player].StopStep();
+                players[current_player].StopStep();
                 current_player = (current_player + 1) % maxPlayers;
 
-                webSockets[current_player].StartStep(CalcPlanetIncome(current_player));
+                players[current_player].StartStep(CalcPlanetIncome(current_player));
             }
         }
 
@@ -158,7 +162,7 @@ namespace Server
         public event Update GameFinish;
 
 
-        List<User> webSockets = new List<User>();
+        List<Player> players = new List<Player>();
         private Dictionary<GameLogic.Coordinates, GameLogic.Planet> planets;
 
         string name = "";

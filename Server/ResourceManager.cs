@@ -11,7 +11,7 @@ using AngleSharp.Dom.Html;
 
 namespace Server
 {
-    class ResourceManager
+    public class ResourceManager
     {
         static public string DocumentRootPath
         {
@@ -21,18 +21,45 @@ namespace Server
             }
         }
 
+        static public string RootPath { get; set; }
+
         public string GetMainPage()
         {
-            return File.ReadAllText(DocumentRootPath);
+            try
+            {
+                return File.ReadAllText(RootPath + DocumentRootPath);
+            }
+            catch (FileNotFoundException)
+            {
+                Console.WriteLine("Main page was not found");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception thrown {0} while main page was opening", ex);
+            }
+            return "";
         }
 
         public string GetRoomPage()
         {
-            return File.ReadAllText("html/Room.html");
+            try
+            {
+                return File.ReadAllText(RootPath + "html/Room.html");
+            }
+            catch (FileNotFoundException)
+            {
+                Console.WriteLine("Room page was not found");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception thrown {0} while room page was opening", ex);
+            }
+            return "";
         }
 
         public byte[] GetResourceFile(string filename)
         {
+            filename = RootPath + filename;
             try
             {
                 return File.ReadAllBytes(filename);

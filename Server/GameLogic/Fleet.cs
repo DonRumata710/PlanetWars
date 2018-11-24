@@ -84,9 +84,12 @@ namespace Server.GameLogic
             Ships.Clear();
         }
         
-        public bool IsEmpty()
+        public bool IsEmpty
         {
-            return Ships.Count == 0;
+            get
+            {
+                return Ships.Count == 0;
+            }
         }
 
 

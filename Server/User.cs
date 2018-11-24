@@ -15,7 +15,7 @@ using Newtonsoft.Json;
 
 namespace Server
 {
-    class User : WebSocketBehavior
+    public class User : WebSocketBehavior
     {
         public void SetConnectionManager(ConnectionManager cm)
         {
@@ -45,29 +45,9 @@ namespace Server
             SafeSend("room:" + name);
         }
 
-        public void StartStep(int new_money)
+        public void StartStep(int money)
         {
-            foreach (Fleet fleet in fleets)
-                fleet.MakeStep();
-
-            money += new_money;
-            is_current = true;
-
             SafeSend("turn:" + money.ToString() + room.GetMap(id));
-        }
-
-        public void StopStep()
-        {
-            is_current = false;
-
-            for (int i = 0; i < fleets.Count; ++i)
-            {
-                if (fleets[i].IsEmpty())
-                {
-                    fleets.RemoveAt(i);
-                    --i;
-                }
-            }
         }
 
         protected override void OnMessage(MessageEventArgs e)
@@ -89,7 +69,6 @@ namespace Server
                 }
 
                 room = manager.AddUserToRoom(room_name, this);
-                id = room.GetId(this);
 
                 SafeSend("id:" + id.ToString());
                 SetRoomName(room_name);
@@ -105,7 +84,7 @@ namespace Server
                     LeaveRoom();
                     SendRoomInfo(manager.CollectRoomInfo());
                 }
-                else if (is_current)
+                else if (player.IsCurrent())
                 {
                     if (e.Data.StartsWith("move:"))
                     {
@@ -141,6 +120,12 @@ namespace Server
             }
         }
 
+        public void SetRoom(Room room)
+        {
+            player = new Player();
+            id = room.AddPlayer(player);
+        }
+
         bool SafeSend(string data)
         {
             if (ConnectionState != DotNet.WebSocket.WebSocketState.Closed)
@@ -155,8 +140,9 @@ namespace Server
         private void LeaveRoom()
         {
             if (room != null)
-                room.RemovePlayer(this);
+                room.RemovePlayer(player);
 
+            player = null;
             id = -1;
         }
 
@@ -169,10 +155,6 @@ namespace Server
         string room_name = "";
         ConnectionManager manager;
         Room room;
-
-        List<Fleet> fleets = new List<Fleet>();
-        int money = 0;
-
-        bool is_current = false;
+        Player player;
     }
 }

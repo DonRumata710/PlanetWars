@@ -11,16 +11,16 @@ using DotNet.WebSocket.Server;
 
 namespace Server
 {
-    class ConnectionManager
+    public class ConnectionManager
     {
-        public void Run(int size, string _ip = null)
+        public void Run(int size, string _url = null)
         {
             rooms = new Dictionary<string, Room>(size);
 
-            if (_ip != null)
-                ip = "http://" + _ip + ":80/";
+            if (_url != null)
+                url = "http://" + _url + ":80/";
             
-            HttpServer server = new HttpServer("http://127.0.0.1:80");
+            HttpServer server = new HttpServer(url);
             server.DocumentRootPath = ResourceManager.DocumentRootPath;
             server.OnGet += HttpResponce;
 
@@ -132,7 +132,7 @@ namespace Server
         public Room AddUserToRoom(string name, User user)
         {
             Monitor.Enter(this);
-            rooms[name].AddPlayer(user);
+            user.SetRoom(rooms[name]);
             RoomUpdate(CollectRoomInfo());
             Monitor.Exit(this);
 
@@ -147,7 +147,7 @@ namespace Server
         }
 
 
-        string ip = "http://127.0.0.1:80/";
+        string url = "http://127.0.0.1:80/";
         Dictionary<string, Room> rooms;
         Dictionary<string, User> players = new Dictionary<string, User>();
         Statistics stat = new Statistics();

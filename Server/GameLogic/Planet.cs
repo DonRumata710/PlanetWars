@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace Server.GameLogic
 {
-    struct Coordinates
+    public struct Coordinates
     {
         public int x;
         public int y;
@@ -96,6 +96,9 @@ namespace Server.GameLogic
 
         public void AppendArmy(Fleet fleet)
         {
+            if (fleet.Owner != Guardians.Owner)
+                throw new Exception("Appending foreign army to planet guardians");
+
             Guardians.Merge(fleet);
         }
 
