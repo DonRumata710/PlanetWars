@@ -68,7 +68,9 @@ namespace Server
                     room_name = parameters[0];
                 }
 
-                room = manager.AddUserToRoom(room_name, this);
+                room = manager.GetRoom(room_name);
+                player = new Player();
+                id = room.AddPlayer(player);
 
                 SafeSend("id:" + id.ToString());
                 SetRoomName(room_name);
@@ -114,7 +116,42 @@ namespace Server
                     }
                     else
                     {
-                        room.HandleUserCmd(e.Data);
+                        string[] cmd_params = e.Data.Split(new char[] { ';', '=' });
+                        if (cmd_params[0] == "finance")
+                        {
+                            int mil = 0;
+                            int civ = 0;
+                            int science = 0;
+                            string planet = "";
+
+                            for (int i = 1; i < cmd_params.Length; i += 2)
+                            {
+                                if (cmd_params[i] == "planet")
+                                {
+                                    planet = cmd_params[i + 1];
+                                }
+                                else if (cmd_params[i] == "mil")
+                                {
+                                    mil = Int32.Parse(cmd_params[i + 1]);
+                                }
+                                else if (cmd_params[i] == "civ")
+                                {
+                                    civ = Int32.Parse(cmd_params[i + 1]);
+                                }
+                                else if (cmd_params[i] == "science")
+                                {
+                                    science = Int32.Parse(cmd_params[i + 1]);
+                                }
+                            }
+
+                            string[] coordinates = planet.Split(new char[] { '-' });
+
+                            room.GetPlanet(Int32.Parse(coordinates[0]), Int32.Parse(coordinates[1])).Finance(mil, civ, science);
+                        }
+                        else if (cmd_params[0] == "step")
+                        {
+                            room.MakeStep(id);
+                        }
                     }
                 }
             }
@@ -122,8 +159,6 @@ namespace Server
 
         public void SetRoom(Room room)
         {
-            player = new Player();
-            id = room.AddPlayer(player);
         }
 
         bool SafeSend(string data)

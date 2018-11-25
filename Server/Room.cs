@@ -15,9 +15,9 @@ namespace Server
     {
         public Room(string _name, int _size, int _maxPlayers, int _planets)
         {
-            name = _name;
-            size = _size;
-            maxPlayers = _maxPlayers;
+            Name = _name;
+            Size = _size;
+            MaxPlayers = _maxPlayers;
 
             planets = new Dictionary<GameLogic.Coordinates, GameLogic.Planet>(_planets);
 
@@ -26,21 +26,26 @@ namespace Server
             {
                 GameLogic.Coordinates coord;
                 do
-                    coord = new GameLogic.Coordinates(rnd.Next(size), rnd.Next(size));
+                    coord = new GameLogic.Coordinates(rnd.Next(Size), rnd.Next(Size));
                 while (planets.ContainsKey(coord));
 
-                planets.Add(coord, new GameLogic.Planet(rnd.Next(size) + 1, i));
+                planets.Add(coord, new GameLogic.Planet(rnd.Next(Size) + 1, i));
             }
         }
 
         public int AddPlayer(Player player)
         {
+            Monitor.Enter(this);
+
+            NewPlayer?.Invoke(Name);
+
             players.Add(player);
 
-            if (players.Count == maxPlayers)
+            if (players.Count == MaxPlayers)
             {
-                players[current_player].StartStep(CalcPlanetIncome(current_player));
+                players[CurrentPlayer].StartStep(CalcPlanetIncome(CurrentPlayer));
             }
+            Monitor.Exit(this);
 
             return players.Count - 1;
         }
@@ -49,7 +54,7 @@ namespace Server
         {
             players.Remove(player);
             if (players.Count == 0 && GameFinish != null)
-                GameFinish(name);
+                GameFinish(Name);
         }
 
         public int GetId(Player player)
@@ -64,55 +69,21 @@ namespace Server
 
         public override string ToString()
         {
-            return String.Format("name={0},size={1},players={2},maxplayers={3};", name, size, players.Count, maxPlayers);
+            return String.Format("name={0},size={1},players={2},maxplayers={3};", Name, Size, players.Count, MaxPlayers);
         }
 
         public bool IsFull()
         {
-            return maxPlayers == players.Count;
+            return MaxPlayers == players.Count;
         }
 
-        public void HandleUserCmd(string cmd)
+
+        public void MakeStep(int player)
         {
-            string[] cmd_params = cmd.Split(new char[] { ';', '=' });
-            if (cmd_params[0] == "finance")
-            {
-                int mil = 0;
-                int civ = 0;
-                int science = 0;
-                string planet = "";
+            players[CurrentPlayer].StopStep();
+            CurrentPlayer = (CurrentPlayer + 1) % MaxPlayers;
 
-                for (int i = 1; i < cmd_params.Length; i += 2)
-                {
-                    if (cmd_params[i] == "planet")
-                    {
-                        planet = cmd_params[i + 1];
-                    }
-                    else if (cmd_params[i] == "mil")
-                    {
-                        mil = Int32.Parse(cmd_params[i + 1]);
-                    }
-                    else if (cmd_params[i] == "civ")
-                    {
-                        civ = Int32.Parse(cmd_params[i + 1]);
-                    }
-                    else if (cmd_params[i] == "science")
-                    {
-                        science = Int32.Parse(cmd_params[i + 1]);
-                    }
-                }
-
-                string[] coordinates = planet.Split(new char[] { '-' });
-
-                GetPlanet(Int32.Parse(coordinates[0]), Int32.Parse(coordinates[1])).Finance(mil, civ, science);
-            }
-            else if (cmd_params[0] == "step")
-            {
-                players[current_player].StopStep();
-                current_player = (current_player + 1) % maxPlayers;
-
-                players[current_player].StartStep(CalcPlanetIncome(current_player));
-            }
+            players[CurrentPlayer].StartStep(CalcPlanetIncome(CurrentPlayer));
         }
 
 
@@ -135,7 +106,7 @@ namespace Server
         private int CalcPlanetIncome(int player)
         {
             int totalIncome = 0;
-            foreach(var planet in planets)
+            foreach (var planet in planets)
             {
                 if (planet.Value.Owner == player)
                 {
@@ -146,31 +117,32 @@ namespace Server
         }
 
 
-        public GameLogic.Planet GetPlanet(int x, int y)
+
+        public Planet GetPlanet(int x, int y)
         {
             return GetPlanet(new GameLogic.Coordinates(x, y));
         }
 
-        public GameLogic.Planet GetPlanet(GameLogic.Coordinates coords)
+        public Planet GetPlanet(Coordinates coords)
         {
             return planets[coords];
         }
 
+        public Coordinates[] PlanetCoordinates { get { return planets.Keys.ToArray<Coordinates>(); } }
+
 
         public delegate void Update(string name);
 
+        public event Update NewPlayer;
         public event Update GameFinish;
 
 
         List<Player> players = new List<Player>();
         private Dictionary<GameLogic.Coordinates, GameLogic.Planet> planets;
 
-        string name = "";
-
-        int size = 0;
-
-        int maxPlayers = 0;
-
-        int current_player = 0;
+        public string Name { get; } = "";
+        public int Size { get; } = 0;
+        public int MaxPlayers { get; } = 0;
+        public int CurrentPlayer { get; private set; } = 0;
     }
 }

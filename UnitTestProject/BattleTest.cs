@@ -72,7 +72,6 @@ namespace LogicTests
             planet.AppendArmy(fleet1);
 
             Fleet fleet2 = new Fleet(player2, new Dictionary<int, int> { { 2, 100 } }, null);
-
             fleet2.Attack(planet, 0.0);
 
             Assert.IsTrue(planet.Owner == player2);
@@ -83,6 +82,38 @@ namespace LogicTests
 
             Assert.IsTrue(planet.Owner == player2);
             Assert.IsTrue(fleet1.IsEmpty);
+        }
+
+        [TestMethod]
+        public void TestMethod3()
+        {
+            int player1 = 1;
+            int player2 = 2;
+
+            Planet planet = new Planet(6, player1);
+
+            Fleet fleet1 = new Fleet(player1, new Dictionary<int, int> { { 0, 100 } }, planet);
+            planet.AppendArmy(fleet1);
+
+            Fleet fleet2 = new Fleet(player2, new Dictionary<int, int> { { 2, 100 } }, planet, 0.5);
+            fleet2.MakeStep();
+
+            Assert.IsTrue(planet.Owner == player2);
+            Assert.IsTrue(fleet1.IsEmpty);
+
+            fleet1 = new Fleet(player1, new Dictionary<int, int> { { 0, 100 } }, planet, 1.5);
+
+            fleet1.MakeStep();
+
+            Assert.IsTrue(planet.Owner == player2);
+            Assert.IsFalse(fleet1.IsEmpty);
+            Assert.IsFalse(fleet2.IsEmpty);
+
+            fleet1.MakeStep();
+
+            Assert.IsTrue(planet.Owner == player2);
+            Assert.IsTrue(fleet1.IsEmpty);
+            Assert.IsFalse(fleet2.IsEmpty);
         }
     }
 }

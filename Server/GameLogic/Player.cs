@@ -16,10 +16,10 @@ namespace Server.GameLogic
             foreach (Fleet fleet in fleets)
                 fleet.MakeStep();
 
-            money += new_money;
+            Money += new_money;
             is_current = true;
 
-            makeTurn(money);
+            makeTurn?.Invoke(Money);
             //SafeSend("turn:" + money.ToString() + room.GetMap(id));
         }
 
@@ -42,8 +42,9 @@ namespace Server.GameLogic
             return is_current;
         }
 
+        public int Money { get; private set; } = 0;
+
         List<Fleet> fleets = new List<Fleet>();
-        int money = 0;
 
         bool is_current = false;
     }

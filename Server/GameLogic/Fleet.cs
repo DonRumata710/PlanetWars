@@ -92,6 +92,17 @@ namespace Server.GameLogic
             }
         }
 
+        public int Size
+        {
+            get
+            {
+                int res = 0;
+                foreach (var ships in Ships)
+                    res += ships.Value;
+                return res;
+            }
+        }
+
 
         public void Merge(Fleet other)
         {

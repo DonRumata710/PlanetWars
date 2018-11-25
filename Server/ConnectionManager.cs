@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using System.IO;
 
 
 using DotNet.WebSocket;
-using DotNet.WebSocket.Net;
 using DotNet.WebSocket.Server;
 
 namespace Server
@@ -125,18 +123,20 @@ namespace Server
             RoomUpdate(CollectRoomInfo());
             Monitor.Exit(this);
 
+            new_room.NewPlayer += NewUserInRoom;
             new_room.GameFinish += DestroyRoom;
+
             return new_room;
         }
 
-        public Room AddUserToRoom(string name, User user)
+        public Room GetRoom(string name)
         {
-            Monitor.Enter(this);
-            user.SetRoom(rooms[name]);
-            RoomUpdate(CollectRoomInfo());
-            Monitor.Exit(this);
-
             return rooms[name];
+        }
+
+        public void NewUserInRoom(string name)
+        {
+            RoomUpdate(CollectRoomInfo());
         }
 
         public void DestroyRoom(string room)
