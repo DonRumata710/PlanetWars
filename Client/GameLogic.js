@@ -82,8 +82,8 @@ function loadGameMap() {
 }
 
 
-function generatePlanetImage() {
-	return "planetX.png"
+function generatePlanetImage(owner) {
+	return "planet" + (user_id === owner ? "X" : "1") + ".png"
 }
 
 
@@ -293,7 +293,7 @@ function buildMap(data) {
 
 	for (var planet_info in game_data) {
 		var cell = document.createElement("img")
-		cell.src = '/png/' + generatePlanetImage()
+		cell.src = '/png/' + generatePlanetImage(game_data[planet_info].Owner)
 		cell.className = "cell"
 		cell.id = planet_info
 		cell.onclick = showInfo
