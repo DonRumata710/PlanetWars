@@ -37,9 +37,9 @@ namespace Server
         {
             Monitor.Enter(this);
 
-            NewPlayer?.Invoke(Name);
-
             players.Add(player);
+
+            NewPlayer?.Invoke(Name);
 
             if (players.Count == MaxPlayers)
             {
