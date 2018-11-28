@@ -14,12 +14,17 @@ namespace UnitTestProject
         public void TestMethod1()
         {
             Room room = new Room("", 6, 2, 2);
+            int players_num = 0;
+
+            room.NewPlayer += (string name) => Assert.IsTrue(++players_num == room.PlayerNumber);
 
             Player player1 = new Player();
             Player player2 = new Player();
 
             int player1_id = room.AddPlayer(player1);
             int player2_id = room.AddPlayer(player2);
+
+            Assert.IsTrue(players_num == 2);
 
             Assert.IsTrue(room.CurrentPlayer == player1_id);
 

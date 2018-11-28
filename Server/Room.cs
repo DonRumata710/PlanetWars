@@ -144,5 +144,6 @@ namespace Server
         public int Size { get; } = 0;
         public int MaxPlayers { get; } = 0;
         public int CurrentPlayer { get; private set; } = 0;
+        public int PlayerNumber { get { return players.Count; } }
     }
 }
