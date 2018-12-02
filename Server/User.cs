@@ -70,6 +70,7 @@ namespace Server
 
                 room = manager.GetRoom(room_name);
                 player = new Player();
+                player.makeTurn += StartStep;
                 id = room.AddPlayer(player);
 
                 SafeSend("id:" + id.ToString());
@@ -109,7 +110,7 @@ namespace Server
                                 return;
                         }
 
-                        Fleet new_fleet = new Fleet(id, new_fleet_ships, target, Coordinates.Distance(start_coord, target_coord));
+                        player.AddFleet(new Fleet(id, new_fleet_ships, target, Coordinates.Distance(start_coord, target_coord)));
 
                         foreach (var ships in new_fleet_ships)
                             place.Guardians.RemoveShips(ships.Key, ships.Value);
@@ -153,12 +154,10 @@ namespace Server
                             room.MakeStep(id);
                         }
                     }
+
+                    SafeSend(room.GetMap(id));
                 }
             }
-        }
-
-        public void SetRoom(Room room)
-        {
         }
 
         bool SafeSend(string data)

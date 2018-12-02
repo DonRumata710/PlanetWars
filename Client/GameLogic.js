@@ -83,7 +83,7 @@ function loadGameMap() {
 
 
 function generatePlanetImage(owner) {
-	return "planet" + (user_id === owner ? "X" : "1") + ".png"
+	return "planet" + (user_id === owner ? "X" : String(owner % 7)) + ".png"
 }
 
 
@@ -92,7 +92,14 @@ function showInfo(element) {
 	if (planet_choise !== undefined) {
 		planet_choise = element.target.id
 		middle.style.cursor = "auto"
-		document.getElementById("fleetcreation").innerHTML += "<br />to " + planet_choise;
+
+		var target = document.getElementById("target")
+		if (target === null) {
+			document.getElementById("fleetcreation").innerHTML += "<dev id='target'>to " + planet_choise + "</dev>";
+		}
+		else {
+			target.innerHTML = "to " + planet_choise;
+		}
 		document.getElementById("send").disabled = false;
 		return
 	}
@@ -188,7 +195,7 @@ function sendFleet() {
 	var ships = {}
 	var ships_list = document.getElementById("ships_list")
 
-	var count = 0
+	var count = 1
 	for (var i = 1; i < ships_list.childElementCount; i += 3) {
 		var val = ships_list.childNodes[i].value
 		ships[count.toString()] = (val === "" ? 0 : val)
@@ -290,6 +297,8 @@ function buildMap(data) {
 	game_data = JSON.parse(data)
 
 	var map = document.getElementById("map")
+
+	map.innerHTML = ""
 
 	for (var planet_info in game_data) {
 		var cell = document.createElement("img")

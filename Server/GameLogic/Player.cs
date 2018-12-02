@@ -37,6 +37,11 @@ namespace Server.GameLogic
             }
         }
 
+        public void AddFleet(Fleet fleet)
+        {
+            fleets.Add(fleet);
+        }
+
         public bool IsCurrent()
         {
             return is_current;
