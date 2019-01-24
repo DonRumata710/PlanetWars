@@ -4,3 +4,6 @@
 /packages/*
 res/
 MigrationBackup/
+*.pyc
+.idea
+venv
