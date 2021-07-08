@@ -1,5 +1,5 @@
 import React from 'react'
-import {NavLink} from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import Header from '../components/header'
 import { signoutRedirect } from '../services/userService'
 import { useSelector } from 'react-redux'

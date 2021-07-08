@@ -7,7 +7,7 @@ const config = {
   redirect_uri: "http://localhost:3000/signin-oidc",
   response_type: "id_token token",
   scope: "openid profile planetwarapi",
-  post_logout_redirect_uri: "http://localhost:3000/signout-oidc",
+  post_logout_redirect_uri: "http://localhost:3000/signout-oidc"
 };
 
 const userManager = new UserManager(config)
