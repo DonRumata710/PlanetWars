@@ -126,15 +126,9 @@ namespace Server
             return new_room;
         }
 
-        public Room GetRoom(string name)
-        {
-            return rooms[name];
-        }
+        public Room GetRoom(string name) => rooms[name];
 
-        public void NewUserInRoom(string name)
-        {
-            RoomUpdate(CollectRoomInfo());
-        }
+        public void NewUserInRoom(string name) => RoomUpdate(CollectRoomInfo());
 
         public void DestroyRoom(string room)
         {

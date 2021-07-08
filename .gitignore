@@ -8,3 +8,4 @@ res/
 *.pyc
 .idea
 venv
+*_log.txt
