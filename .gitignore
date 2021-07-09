@@ -1,9 +1,10 @@
 .vs
+.vscode
+*.user
 /**/bin/
 /**/obj/
 /packages/*
 res/
-MigrationBackup/
 *.pyc
 .idea
 venv
