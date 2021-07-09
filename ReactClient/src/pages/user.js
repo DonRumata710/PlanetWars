@@ -1,14 +1,13 @@
 
-import Header from '../components/header'
 import React, { Component } from 'react'
+import Page from '../components/page';
 
 class UserPage extends Component
 {
     render() {
         return (
-            <div>
-                <Header />
-            </div>
+            <Page>
+            </Page>
         );
     }
 }

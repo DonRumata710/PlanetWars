@@ -14,7 +14,7 @@ function SignoutOidc() {
 
   return (
     <div>
-      Redirecting...
+      Never should have come here.
     </div>
   )
 }

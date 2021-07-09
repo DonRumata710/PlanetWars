@@ -1,5 +1,5 @@
-import React, { Component, useEffect } from 'react'
-import { BrowserRouter, Route } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { BrowserRouter, Route, Switch } from 'react-router-dom'
 import Home from './pages/home'
 import Login from './pages/login'
 import GamePage from './pages/game'
@@ -16,25 +16,24 @@ import SignoutOidc from './pages/signout-oidc'
 
 function App() {
   useEffect(() => {
-    // fetch current user from cookies
     loadUserFromStorage(store)
   }, [])
   
   return (
-    <div>
-      <Provider store={store}>
-        <AuthProvider userManager={userManager} store={store}>
-          <BrowserRouter>
-            <ProtectedRoute exact path='/' component={Home} />
+    <Provider store={store}>
+      <AuthProvider userManager={userManager} store={store}>
+        <BrowserRouter>
+          <Switch>
             <Route path='/login' component={Login} />
-            <Route path='/game/:sessionId?' component={GamePage} />
-            <Route path='/user/:userId?' component={UserPage} />
             <Route path="/signout-oidc" component={SignoutOidc} />
             <Route path="/signin-oidc" component={SigninOidc} />
-          </BrowserRouter>
-        </AuthProvider>
-      </Provider>
-    </div>
+            <ProtectedRoute exact path='/' component={Home} />
+            <ProtectedRoute path='/game/:sessionId?' component={GamePage} />
+            <ProtectedRoute path='/user/:userId?' component={UserPage} />
+          </Switch>
+        </BrowserRouter>
+      </AuthProvider>
+    </Provider>
   );
 }
 

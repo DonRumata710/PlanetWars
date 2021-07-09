@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Header from '../components/header'
+import Page from '../components/page'
 
 class Cell extends Component
 {
@@ -43,10 +43,9 @@ class GamePage extends Component
 {
     render() {
         return (
-            <div>
-              <Header />
+            <Page>
               <Board size='10'></Board>
-            </div>
+            </Page>
         )
     }
 }

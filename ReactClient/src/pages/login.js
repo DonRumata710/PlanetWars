@@ -2,7 +2,7 @@ import React from 'react'
 import { signinRedirect } from '../services/userService'
 import { Redirect } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-import Header from '../components/header'
+import Page from '../components/page'
 
 function Login() {
   const user = useSelector(state => state.auth.user)
@@ -16,12 +16,11 @@ function Login() {
       (<Redirect to={'/'} />)
       :
       (
-        <div>
-          <Header />
+        <Page>
           <p>Welcome to PlanetWar server.</p>
           <p>Please, login to continue</p>
           <button onClick={() => login()}>Login</button>
-        </div>
+        </Page>
       )
   )
 }
