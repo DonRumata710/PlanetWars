@@ -4,13 +4,10 @@ using System.Threading;
 using System.IO;
 
 
-using DotNet.WebSocket;
-using DotNet.WebSocket.Server;
-
 namespace Server
 {
     public class ConnectionManager
-    {
+    {/*
         public void Run(int size, string _url = null)
         {
             rooms = new Dictionary<string, Room>(size);
@@ -150,6 +147,6 @@ namespace Server
         string url = "http://127.0.0.1:80/";
         Dictionary<string, Room> rooms;
         Dictionary<string, User> players = new Dictionary<string, User>();
-        Statistics stat = new Statistics();
+        Statistics stat = new Statistics();*/
     }
 }

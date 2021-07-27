@@ -5,9 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net.WebSockets;
 
-using DotNet.WebSocket;
-using DotNet.WebSocket.Net;
-using DotNet.WebSocket.Server;
 
 using Server.GameLogic;
 
@@ -15,8 +12,8 @@ using Newtonsoft.Json;
 
 namespace Server
 {
-    public class User : WebSocketBehavior
-    {
+    public class User// : WebSocketBehavior
+    {/*
         public void SetConnectionManager(ConnectionManager cm)
         {
             manager = cm;
@@ -189,6 +186,6 @@ namespace Server
         string room_name = "";
         ConnectionManager manager;
         Room room;
-        Player player;
+        Player player;*/
     }
 }
