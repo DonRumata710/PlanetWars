@@ -4,7 +4,7 @@ import logo from '../logo.svg';
 
 function Header() {
     return (
-        <div class="App-header">
+        <div className="App-header">
             <NavLink exact activeClassName="active" to="/"><img style={{width: 50, height: 50}} src={logo} className="App-logo" alt="../logo" /></NavLink>
         </div>
     )

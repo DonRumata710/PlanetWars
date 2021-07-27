@@ -14,7 +14,7 @@ function SigninOidc() {
 
   return (
     <div>
-      Redirecting...
+      Never should have come here.
     </div>
   )
 }
