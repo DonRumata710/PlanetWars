@@ -1,15 +1,11 @@
 import React from 'react'
-import { signinRedirect } from '../services/userService'
+import { login } from '../services/userService'
 import { Redirect } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import Page from '../components/page'
 
 function Login() {
   const user = useSelector(state => state.auth.user)
-
-  function login() {
-    signinRedirect()
-  }
 
   return (
     (user) ?

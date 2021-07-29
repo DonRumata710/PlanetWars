@@ -23,7 +23,7 @@ export async function loadUserFromStorage(store) {
   }
 }
 
-export function signinRedirect() {
+function signinRedirect() {
   return userManager.signinRedirect()
 }
 
@@ -31,7 +31,7 @@ export function signinRedirectCallback() {
   return userManager.signinRedirectCallback()
 }
 
-export function signoutRedirect() {
+function signoutRedirect() {
   userManager.clearStaleState()
   userManager.removeUser()
   return userManager.signoutRedirect()
@@ -41,6 +41,14 @@ export function signoutRedirectCallback() {
   userManager.clearStaleState()
   userManager.removeUser()
   return userManager.signoutRedirectCallback()
+}
+
+export function login() {
+  signinRedirect()
+}
+
+export function signOut() {
+  signoutRedirect()
 }
 
 export default userManager
