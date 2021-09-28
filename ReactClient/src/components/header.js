@@ -10,7 +10,7 @@ function Header() {
     return (
         <div className="app-header">
             <NavLink exact activeClassName="active" to="/"><img style={{width: 50, height: 50}} src={logo} className="app-logo" alt="../logo" /></NavLink>
-            <button class="header-widget" onClick={() => user ? signOut() : login()}>{user ? "Logout" : "Login"}</button>
+            <button className="header-widget" onClick={() => user ? signOut() : login()}>{user ? "Logout" : "Login"}</button>
         </div>
     )
 }

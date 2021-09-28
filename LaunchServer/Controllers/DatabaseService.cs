@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 using Interfaces.Models;
-
+using LaunchServer.Models;
 
 namespace LaunchServer.Controllers
 {
@@ -16,16 +16,6 @@ namespace LaunchServer.Controllers
         }
 
         ~DatabaseService()
-        {
-            Close();
-        }
-
-        public void Open()
-        {
-            connection.Open();
-        }
-
-        public void Close()
         {
             connection.Close();
         }
@@ -81,6 +71,48 @@ namespace LaunchServer.Controllers
                         res.Add(dr.GetString("address").ToString(), serverModel);
                     }
                     return res;
+                }
+            }
+        }
+
+        public UserInfo GetUserInfo(string name)
+        {
+            string strSQL = "SELECT * FROM `user_list` WHERE `username`=@username";
+            using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
+            {
+                using (MySqlDataReader dr = cmd.ExecuteReader())
+                {
+                    cmd.Parameters.Add("username", MySqlDbType.String).Value = name;
+                    UserInfo info = new UserInfo();
+                    if (dr.Read())
+                    {
+                        info.email = dr.IsDBNull(dr.GetOrdinal("email")) ? dr.GetString("email") : "";
+                        info.userId = dr.GetUInt64("user_id");
+                        info.name = dr.GetString("username");
+                        info.registerTime = dr.IsDBNull(dr.GetOrdinal("create_time")) ? dr.GetDateTime("create_time") : null;
+                    }
+                    return info;
+                }
+            }
+        }
+
+        public UserInfo GetUserInfo(int id)
+        {
+            string strSQL = "SELECT * FROM `user_list` WHERE `user_id`=@user_id";
+            using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
+            {
+                cmd.Parameters.Add("user_id", MySqlDbType.Int32).Value = id;
+                using (MySqlDataReader dr = cmd.ExecuteReader())
+                {
+                    UserInfo info = new UserInfo();
+                    if (dr.Read())
+                    {
+                        info.email = !dr.IsDBNull(dr.GetOrdinal("email")) ? dr.GetString("email") : "";
+                        info.userId = dr.GetUInt64("user_id");
+                        info.name = dr.GetString("username");
+                        info.registerTime = !dr.IsDBNull(dr.GetOrdinal("create_time")) ? dr.GetDateTime("create_time") : null;
+                    }
+                    return info;
                 }
             }
         }

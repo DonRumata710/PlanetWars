@@ -6,7 +6,9 @@ async function getSessions() {
 }
 
 async function createSession(params) {
-    const response = await axios.post('https://localhost:44348/sessions', params);
+    const response = await axios.post('https://localhost:44348/sessions',
+      { params: { params } }
+    );
     return response.data;
 }
 
@@ -15,8 +17,16 @@ async function getDefaultGameParameters() {
   return response.data;
 }
 
+async function getUserInfo(username) {
+  const response = await axios.get('https://localhost:44348/user',
+    { params: { username } }
+  );
+  return response.data;
+}
+
 export {
     getSessions,
     createSession,
-    getDefaultGameParameters
+    getDefaultGameParameters,
+    getUserInfo
 }
