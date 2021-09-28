@@ -4,10 +4,6 @@ import { getDefaultGameParameters } from '../services/launchService'
 import PropertyList from '../components/propertyList'
 
 class NewSession extends Component {
-    constructor() {
-        super();
-    }
-        
     render() {
         if (this.defaultData)
         {

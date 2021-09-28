@@ -151,55 +151,28 @@ namespace IdentityServer
             return null;
         }
 
-        // Стандартная и очень привлекательная практика для ASP.NET WebForms, поскольку позволяет в компонентах для отображения данных напрямую обращаться к данным в ObjectDataSource без образования специальной типизированной модели
-        // Но так писать не надо, потому что в представлении мы вынуждены будем использовать "магические строки" для получения доступа к значениям в строке данных
-        //public IEnumerable<DataRow> List()
-        //{
-        //    using (MySqlConnection objConnect = new MySqlConnection(Base.strConnect))
-        //    {
-        //        string strSQL = "select * from users";
-        //        using (MySqlCommand objCommand = new MySqlCommand(strSQL, objConnect))
-        //        {
-        //            objConnect.Open();
-        //            using (MySqlDataAdapter da = new MySqlDataAdapter(objCommand))
-        //            {
-        //                DataTable dt = new DataTable();
-        //                da.Fill(dt);
-        //                return dt.AsEnumerable();
-        //            }
-        //        }
-        //    }
-        //}
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Проверка запросов SQL на уязвимости безопасности")]
         public IList<User> List(string sortOrder, bool descending, int page, int pagesize, out int count)
         {
             List<User> users = new List<User>();
             // добавляем в запрос сортировку
             string sort = " ORDER BY ";
-            // это плохая практика, потому что запрос может быть взломан при удачном встраивании в него некоей текстовой строки (inject)
-            // но, к сожалению, MySQL не дает возможности использовать параметры для сортировки
-            // поэтому надо экранировать кавычками, но перед этим обеспечить сначала проверку входного значения (чтобы тех же кавычек в нём не было)
-            // в нашем проекте проверка значения идет в контроллере, перед простроением модели
             if (sortOrder != null && sortOrder != String.Empty)
             {
                 sort += "`" + sortOrder + "`";
                 if (descending) sort += " DESC";
                 sort += ",";
             }
-            sort += "`user_id`"; // по умолчанию
-            // добавляем в запрос отображение только части записей (отображение страницами)
+            sort += "`user_id`";
             string limit = "";
             if (pagesize > 0)
             {
                 int start = (page - 1) * pagesize;
                 limit = string.Concat(" LIMIT ", start.ToString(), ", ", pagesize.ToString());
             }
-            string strSQL = "SELECT SQL_CALC_FOUND_ROWS u.`user_id`, u.`username`, u.`email`, u.`create_time` FROM `user_list` " + sort + limit;
+            string strSQL = "SELECT SQL_CALC_FOUND_ROWS `user_id`, `username`, `email`, `create_time` FROM `user_list` " + sort + limit;
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
-                //cmd.Parameters.Add("page", MySqlDbType.Int32).Value = page;
-                //cmd.Parameters.Add("pagesize", MySqlDbType.Int32).Value = pagesize;
                 using (MySqlDataReader dr = cmd.ExecuteReader())
                 {
                     while (dr.Read())
@@ -214,7 +187,6 @@ namespace IdentityServer
                     }
                 }
             }
-            // получаем общее количество пользователей
             using (MySqlCommand cmdrows = new MySqlCommand("SELECT FOUND_ROWS()", connection))
             {
                 int.TryParse(cmdrows.ExecuteScalar().ToString(), out count);
