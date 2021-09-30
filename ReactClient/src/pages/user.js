@@ -8,6 +8,7 @@ class UserPage extends Component
     constructor(props) {
         super(props)
         this.username = props.match.params.userId;
+        this.isSent = false;
     }
 
     render() {
@@ -23,10 +24,14 @@ class UserPage extends Component
         }
         else
         {
-            getUserInfo(this.username).then((value) => {
-                this.info = value;
-                this.forceUpdate();
-            });
+            if (!this.isSent)
+            {
+                getUserInfo(this.username).then((value) => {
+                    this.info = value;
+                    this.forceUpdate();
+                });
+                this.isSent = true;
+            }
 
             return (
                 <Page />

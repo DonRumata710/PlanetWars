@@ -185,10 +185,10 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `create_session`(OUT id INT, IN serverId INT, IN sessionName VARCHAR(45), IN sessionDescription VARCHAR(45), IN size INT, IN planetCount INT, IN playerCount INT)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `create_session`(OUT id INT, IN sessionName VARCHAR(45), IN sessionDescription VARCHAR(45), IN size INT, IN planetCount INT, IN playerCount INT)
 BEGIN
 	START TRANSACTION;
-	INSERT INTO `session_list` (`server_id`, `name`, `description`, `size`, `planet_count`, `player_count`) VALUES (serverId, sessionName, sessionDescription, size, planetCount, playerCount);
+	INSERT INTO `session_list` (`name`, `description`, `size`, `planet_count`, `player_count`) VALUES (sessionName, sessionDescription, size, planetCount, playerCount);
     SET id = last_insert_id();
     COMMIT;
 END ;;
@@ -245,4 +245,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-09-30 21:21:31
+-- Dump completed on 2021-10-01  0:16:12

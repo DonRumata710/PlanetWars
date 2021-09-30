@@ -22,18 +22,18 @@ namespace LaunchServer.Controllers
 
         public int CreateNewSession(SessionStartParameters session)
         {
-            string strSQL = "create_session(@session_id, @name, @description, @size, @planetCount, @playerCount);";
+            string strSQL = "create_session";
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
-                cmd.Parameters.Add("name", MySql.Data.MySqlClient.MySqlDbType.VarChar).Value = session.Name;
-                cmd.Parameters.Add("description", MySql.Data.MySqlClient.MySqlDbType.VarChar).Value = session.Description;
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.Parameters.Add("sessionName", MySql.Data.MySqlClient.MySqlDbType.VarChar).Value = session.Name;
+                cmd.Parameters.Add("sessionDescription", MySql.Data.MySqlClient.MySqlDbType.VarChar).Value = session.Description;
                 cmd.Parameters.Add("size", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session.Size;
                 cmd.Parameters.Add("planetCount", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session.PlanetCount;
                 cmd.Parameters.Add("playerCount", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session.PlayerLimit;
-                using (MySqlDataReader dr = cmd.ExecuteReader())
-                {
-                    return dr.GetInt32("session_id");
-                }
+                cmd.Parameters.Add("id", MySql.Data.MySqlClient.MySqlDbType.Int32).Direction = System.Data.ParameterDirection.Output;
+                cmd.ExecuteNonQuery();
+                return (int)cmd.Parameters["id"].Value;
             }
 
             throw new Exception("Failed create session");
@@ -61,7 +61,7 @@ namespace LaunchServer.Controllers
             foreach (int player in players)
                 AddPlayer(player, session);
 
-            string strSQL = "start_session(@sessionId, @serverId);";
+            string strSQL = "call start_session(@sessionId, @serverId);";
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
                 cmd.Parameters.Add("sessionId", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session;
@@ -72,7 +72,7 @@ namespace LaunchServer.Controllers
 
         private void AddPlayer(int playerId, int sessionId)
         {
-            string strSQL = "add_player_to_session(@sessionId, @playerId);";
+            string strSQL = "call add_player_to_session(@sessionId, @playerId);";
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
                 cmd.Parameters.Add("sessionId", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = sessionId;
@@ -81,20 +81,20 @@ namespace LaunchServer.Controllers
             }
         }
 
-        public Dictionary<string, GameServer> ServerList()
+        public Dictionary<int, GameServer> ServerList()
         {
             string strSQL = "SELECT * FROM `server_list`";
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
                 using (MySqlDataReader dr = cmd.ExecuteReader())
                 {
-                    Dictionary<string, GameServer> res = new Dictionary<string, GameServer>();
+                    Dictionary<int, GameServer> res = new Dictionary<int, GameServer>();
                     while (dr.Read())
                     {
                         GameServer serverModel = new GameServer();
                         serverModel.ActiveSessions = 0;
-                        serverModel.SessionLimit = dr.GetInt64("session_limit");
-                        res.Add(dr.GetString("address").ToString(), serverModel);
+                        serverModel.SessionLimit = dr.GetInt32("session_limit");
+                        res.Add(dr.GetInt32("server_id"), serverModel);
                     }
                     return res;
                 }

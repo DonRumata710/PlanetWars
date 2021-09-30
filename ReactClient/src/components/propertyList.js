@@ -5,7 +5,7 @@ class PropertyList extends Component {
         super(props);
         
         this.propertyFields = this.props.properties.map((prop) => {
-            return (<div key={prop.name}>{prop.name} <input type={prop.type} defaultValue={prop.currentValue} onChange={(input) => { prop.currentValue = input.target.value; }}></input></div>)
+            return (<div key={prop.name}>{prop.name}: <input type={prop.type} defaultValue={prop.currentValue} onChange={(input) => { prop.currentValue = input.target.value; }}></input></div>)
         });
     }
 

@@ -43,15 +43,37 @@ namespace LaunchServer.Controllers
             return Ok(res);
         }
 
-        [HttpPost]
-        public IActionResult RegisterSession(SessionStartParameters param)
+        const int PlanetMinCount = 2;
+        const int PlayerMinCount = 2;
+        const int MinSize = 3;
+
+        [HttpGet]
+        [Route("min")]
+        public IActionResult GetMinSettings()
         {
+            SessionStartParameters res = new SessionStartParameters();
+            res.PlanetCount = PlanetMinCount;
+            res.PlayerLimit = PlayerMinCount;
+            res.Size = MinSize;
+            return Ok(res);
+        }
+
+        [HttpPost]
+        public IActionResult RegisterSession([FromBody]SessionStartParameters param)
+        {
+            if (param.Name == null ||
+                param.PlanetCount < PlanetMinCount ||
+                param.PlayerLimit < PlayerMinCount ||
+                param.Size < MinSize
+            )
+                return StatusCode(422);
+
             var userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             Session session = new Session
             {
                 Parameters = param,
-                Players = { userId }
+                Players = new List<int>{ userId }
             };
 
             int id = database.CreateNewSession(param);
@@ -60,8 +82,7 @@ namespace LaunchServer.Controllers
             return Ok(id);
         }
 
-        [HttpPost]
-        [Route("refresh")]
+        [HttpPut]
         public IActionResult RefreshSession(int id, SessionStartParameters param)
         {
             database.RefreshSession(id, param);
