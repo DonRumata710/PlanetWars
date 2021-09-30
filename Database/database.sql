@@ -30,7 +30,64 @@ CREATE TABLE `ban_list` (
   `admin` varchar(30) NOT NULL,
   `user_id` int NOT NULL,
   `reason` varchar(45) NOT NULL,
+  `date` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`action_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `server_list`
+--
+
+DROP TABLE IF EXISTS `server_list`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `server_list` (
+  `server_id` int NOT NULL AUTO_INCREMENT,
+  `address` varchar(45) NOT NULL,
+  `session_limit` int unsigned NOT NULL,
+  PRIMARY KEY (`server_id`),
+  UNIQUE KEY `server_id_UNIQUE` (`server_id`),
+  UNIQUE KEY `address_UNIQUE` (`address`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `session_list`
+--
+
+DROP TABLE IF EXISTS `session_list`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `session_list` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `server_id` int DEFAULT NULL,
+  `creation_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `start_time` datetime DEFAULT NULL,
+  `finish_time` datetime DEFAULT NULL,
+  `winner_id` int DEFAULT NULL,
+  `name` varchar(45) NOT NULL,
+  `description` varchar(45) DEFAULT NULL,
+  `size` int unsigned NOT NULL,
+  `planet_count` int unsigned NOT NULL,
+  `player_count` int unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `session_members`
+--
+
+DROP TABLE IF EXISTS `session_members`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `session_members` (
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `session_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `session_member` (`user_id`,`session_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -56,6 +113,27 @@ CREATE TABLE `user_list` (
 --
 -- Dumping routines for database 'planetwars'
 --
+/*!50003 DROP PROCEDURE IF EXISTS `add_player_to_session` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `add_player_to_session`(IN sessionId INT, IN playerId INT)
+BEGIN
+	START TRANSACTION;
+	INSERT INTO `session_members` (`user_id`, `session_id`) VALUES (playerId, sessionId);
+    COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `block_user` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -85,12 +163,53 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `change_user_state`(IN state BOOLEAN, IN admin_id VARCHAR(30), IN user_id INT, IN reason VARCHAR(45))
+CREATE DEFINER=`root`@`localhost` PROCEDURE `change_user_state`(IN state BOOLEAN, IN cur_admin VARCHAR(30), IN selected_user INT, IN reason VARCHAR(45))
 BEGIN
 	START TRANSACTION;
-	INSERT INTO ban_list(`user_enabled`, `admin`, `user_id`, `reason`) VALUES(state, admin_id, user_id, reason);
-    UPDATE `user_list` SET `enabled` = FALSE WHERE `user_id` = user_id;
+	INSERT INTO ban_list(`user_enabled`, `admin`, `user_id`, `reason`) VALUES(state, cur_admin, selected_user, reason);
+    UPDATE `user_list` SET `active_user` = state WHERE `user_id` = selected_user;
     COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `create_session` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `create_session`(OUT id INT, IN serverId INT, IN sessionName VARCHAR(45), IN sessionDescription VARCHAR(45), IN size INT, IN planetCount INT, IN playerCount INT)
+BEGIN
+	START TRANSACTION;
+	INSERT INTO `session_list` (`server_id`, `name`, `description`, `size`, `planet_count`, `player_count`) VALUES (serverId, sessionName, sessionDescription, size, planetCount, playerCount);
+    SET id = last_insert_id();
+    COMMIT;
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `start_session` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `start_session`(IN sessionId INT, IN serverId INT)
+BEGIN
+	UPDATE `session_list` SET `start_time`=CURRENT_TIMESTAMP, `server_id`=serverId WHERE id=sessionId;
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -126,4 +245,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-06-19 17:25:38
+-- Dump completed on 2021-09-30 21:21:31
