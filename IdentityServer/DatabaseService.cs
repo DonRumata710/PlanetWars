@@ -102,52 +102,33 @@ namespace IdentityServer
 
         public User FetchByID(int ID)
         {
-            User user = null;
-            string strSQL = "SELECT `user_id`, `username`, `password`, `email`, `create_time` FROM `user_list` WHERE `user_id`=@user_id";
+            string strSQL = "SELECT * FROM `user_list` WHERE `user_id`=@user_id";
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
-                ulong userID = 0;
-                string username = null;
-                string password = String.Empty;
-                string email = String.Empty;
-                DateTime? registerDate = null;
                 cmd.Parameters.Add("user_id", MySqlDbType.Int32).Value = ID;
-                using (MySqlDataReader dr = cmd.ExecuteReader())
-                {
-                    if (dr.Read())
-                    {
-                        userID = dr.GetUInt64("user_id");
-                        username = dr.GetString("username").ToString();
-                        password = dr.GetString("password").ToString(); ;
-                        if (!dr.IsDBNull(dr.GetOrdinal("email"))) email = dr.GetString("email").ToString();
-                        if (!dr.IsDBNull(dr.GetOrdinal("create_time"))) registerDate = dr.GetDateTime("create_time");
-                    }
-                    if (userID > 0)
-                        user = new User(userID, username, email, password, registerDate);
-                }
+                return FetchUser(cmd);
             }
-            return user;
         }
 
         public User FetchByUsername(string Name)
         {
-            string strSQL = "SELECT `user_id`, `username`, `password`, `email`, `create_time` FROM `user_list` WHERE `username`=@username";
+            string strSQL = "SELECT * FROM `user_list` WHERE `username`=@username";
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
                 cmd.Parameters.Add("username", MySqlDbType.String).Value = Name;
-                using (MySqlDataReader dr = cmd.ExecuteReader())
-                {
-                    if (dr.Read())
-                    {
-                        return new User(
-                            dr.GetUInt64("user_id"),
-                            dr.GetString("username"),
-                            dr.IsDBNull(dr.GetOrdinal("email")) ? dr.GetString("email") : "",
-                            dr.GetString("password"),
-                            dr.IsDBNull(dr.GetOrdinal("create_time")) ? dr.GetDateTime("create_time") : null);
-                    }
-                }
+                return FetchUser(cmd);
             }
+            return null;
+        }
+
+        public User FetchUser(MySqlCommand cmd)
+        {
+            using (MySqlDataReader dr = cmd.ExecuteReader())
+            {
+                if (dr.Read())
+                    return ReadUserInfo(dr);
+            }
+
             return null;
         }
 
@@ -155,7 +136,6 @@ namespace IdentityServer
         public IList<User> List(string sortOrder, bool descending, int page, int pagesize, out int count)
         {
             List<User> users = new List<User>();
-            // добавляем в запрос сортировку
             string sort = " ORDER BY ";
             if (sortOrder != null && sortOrder != String.Empty)
             {
@@ -170,21 +150,13 @@ namespace IdentityServer
                 int start = (page - 1) * pagesize;
                 limit = string.Concat(" LIMIT ", start.ToString(), ", ", pagesize.ToString());
             }
-            string strSQL = "SELECT SQL_CALC_FOUND_ROWS `user_id`, `username`, `email`, `create_time` FROM `user_list` " + sort + limit;
+            string strSQL = "SELECT SQL_CALC_FOUND_ROWS * FROM `user_list` " + sort + limit;
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
                 using (MySqlDataReader dr = cmd.ExecuteReader())
                 {
                     while (dr.Read())
-                    {
-                        users.Add(new User(
-                            dr.GetUInt64("user_id"),
-                            dr.GetString("username"),
-                            dr.IsDBNull(dr.GetOrdinal("email")) ? dr.GetString("email") : "",
-                            dr.GetString("password"),
-                            dr.IsDBNull(dr.GetOrdinal("create_time")) ? dr.GetDateTime("create_time") : null
-                        ));
-                    }
+                        users.Add(ReadUserInfo(dr));
                 }
             }
             using (MySqlCommand cmdrows = new MySqlCommand("SELECT FOUND_ROWS()", connection))
@@ -192,6 +164,17 @@ namespace IdentityServer
                 int.TryParse(cmdrows.ExecuteScalar().ToString(), out count);
             }
             return users;
+        }
+
+        public User ReadUserInfo(MySqlDataReader dr)
+        {
+            return new User(
+                dr.GetUInt64("user_id"),
+                dr.GetString("username"),
+                !dr.IsDBNull(dr.GetOrdinal("email")) ? dr.GetString("email") : "",
+                dr.GetString("password"),
+                !dr.IsDBNull(dr.GetOrdinal("create_time")) ? dr.GetDateTime("create_time") : null,
+                dr.GetBoolean("active_user"));
         }
 
         public bool CompareCredentials(string password, string hash)
@@ -208,9 +191,7 @@ namespace IdentityServer
                 using (MySqlDataReader dr = cmd.ExecuteReader())
                 {
                     if (dr.Read())
-                    {
                         return CompareCredentials(password, dr.GetString("password"));
-                    }
                 }
             }
             return false;

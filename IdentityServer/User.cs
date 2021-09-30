@@ -16,14 +16,16 @@ namespace IdentityServer
         public string email;
         public string password;
         public DateTime? registerTime;
+        public bool isActive;
 
-        public User(ulong _userId, string _name, string _email, string _password, DateTime? _regTime)
+        public User(ulong _userId, string _name, string _email, string _password, DateTime? _regTime, bool _isActive)
         {
             userId = _userId;
             name = _name;
             email = _email;
             password = _password;
             registerTime = _regTime;
+            isActive = _isActive;
         }
     }
 }
