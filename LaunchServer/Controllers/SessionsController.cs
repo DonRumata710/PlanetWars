@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Interfaces.Models;
+using System.Security.Claims;
 
 namespace LaunchServer.Controllers
 {
@@ -18,6 +19,20 @@ namespace LaunchServer.Controllers
         }
 
         [HttpGet]
+        public IActionResult Get()
+        {
+            return Ok(sessions);
+        }
+
+        [HttpPost]
+        [Route("join")]
+        public IActionResult Join(int sessionId)
+        {
+            sessions[sessionId].Players.Add(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            return Ok();
+        }
+
+        [HttpGet]
         [Route("default")]
         public IActionResult GetDefaultSettings()
         {
@@ -28,49 +43,56 @@ namespace LaunchServer.Controllers
             return Ok(res);
         }
 
-        [HttpGet]
-        public IActionResult Get()
-        {
-            return Ok(sessions);
-        }
-
         [HttpPost]
-        public IActionResult Post(SessionStartParameters param)
+        public IActionResult RegisterSession(SessionStartParameters param)
         {
+            var userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
             Session session = new Session
             {
-                Parameters = param
+                Parameters = param,
+                Players = { userId }
             };
 
-            int id = database.CreateNewSession(session);
+            int id = database.CreateNewSession(param);
             sessions.Add(id, session);
 
             return Ok(id);
         }
 
-        [HttpPut]
-        public IActionResult Put(int id)
+        [HttpPost]
+        [Route("refresh")]
+        public IActionResult RefreshSession(int id, SessionStartParameters param)
         {
-            string serverAddress = null;
+            database.RefreshSession(id, param);
+            sessions[id].Parameters = param;
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("start")]
+        public IActionResult StartSession(int id)
+        {
+            int serverId = -1;
             float minRatio = float.MaxValue;
             foreach(var server in servers)
             {
                 float ratio = server.Value.ActiveSessions / (float)server.Value.SessionLimit;
                 if (ratio < minRatio)
                 {
-                    serverAddress = server.Key;
+                    serverId = server.Key;
                     minRatio = ratio;
                 }
             }
 
-            database.StartSession(id);
+            database.StartSession(id, sessions[id].Players, serverId);
 
             return Ok();
         }
 
 
         private DatabaseService database;
-        private Dictionary<string, GameServer> servers;
+        private Dictionary<int, GameServer> servers;
         private Dictionary<int, Session> sessions = new Dictionary<int, Session>();
     }
 }

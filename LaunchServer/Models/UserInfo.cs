@@ -11,5 +11,6 @@ namespace LaunchServer.Models
         public string name { get; set; }
         public string email { get; set; }
         public DateTime? registerTime { get; set; }
+        public bool isActive { get; set; }
     }
 }

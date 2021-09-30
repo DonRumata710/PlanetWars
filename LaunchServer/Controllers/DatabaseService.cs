@@ -20,37 +20,63 @@ namespace LaunchServer.Controllers
             connection.Close();
         }
 
-        public int CreateNewSession(Session session)
+        public int CreateNewSession(SessionStartParameters session)
         {
-            string strSQL = "INSERT INTO `session_list` (`server_id`, `name`, `description`, `size`, `planet_count`, `player_count`) VALUES (@id, @name, @description, @size, @planetCount, @playerCount);";
+            string strSQL = "create_session(@session_id, @name, @description, @size, @planetCount, @playerCount);";
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
-                cmd.Parameters.Add("id", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session.ServerId;
-                cmd.Parameters.Add("name", MySql.Data.MySqlClient.MySqlDbType.VarChar).Value = session.Parameters.Name;
-                cmd.Parameters.Add("description", MySql.Data.MySqlClient.MySqlDbType.VarChar).Value = session.Parameters.Description;
-                cmd.Parameters.Add("size", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session.Parameters.Size;
-                cmd.Parameters.Add("planetCount", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session.Parameters.PlanetCount;
-                cmd.Parameters.Add("playerCount", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session.Players.Count;
-
-                if (cmd.ExecuteNonQuery() >= 0)
+                cmd.Parameters.Add("name", MySql.Data.MySqlClient.MySqlDbType.VarChar).Value = session.Name;
+                cmd.Parameters.Add("description", MySql.Data.MySqlClient.MySqlDbType.VarChar).Value = session.Description;
+                cmd.Parameters.Add("size", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session.Size;
+                cmd.Parameters.Add("planetCount", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session.PlanetCount;
+                cmd.Parameters.Add("playerCount", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session.PlayerLimit;
+                using (MySqlDataReader dr = cmd.ExecuteReader())
                 {
-                    strSQL = "SELECT LAST_INSERT_ID() AS ID";
-                    cmd.CommandText = strSQL;
-                    int ID = 0;
-                    int.TryParse(cmd.ExecuteScalar().ToString(), out ID);
-
-                    return ID;
+                    return dr.GetInt32("session_id");
                 }
             }
 
             throw new Exception("Failed create session");
         }
 
-        public void StartSession(int id)
+        public void RefreshSession(int id, SessionStartParameters session)
         {
-            string strSQL = "UPDATE `session_list` SET `start_time`=CURRENT_TIMESTAMP";
+            string strSQL = "UPDATE `session_list` SET `name`=@name, `description`=@description, `size`=@size, `planet_count`=@planet_count, `player_count`=@player_count;";
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
+                cmd.Parameters.Add("name", MySql.Data.MySqlClient.MySqlDbType.VarChar).Value = session.Name;
+                cmd.Parameters.Add("description", MySql.Data.MySqlClient.MySqlDbType.VarChar).Value = session.Description;
+                cmd.Parameters.Add("size", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session.Size;
+                cmd.Parameters.Add("planet_count", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session.PlanetCount;
+                cmd.Parameters.Add("player_count", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session.PlayerLimit;
+                if (cmd.ExecuteNonQuery() != 1)
+                {
+                    throw new Exception("Failure while update session");
+                }
+            }
+        }
+
+        public void StartSession(int session, List<int> players, int server)
+        {
+            foreach (int player in players)
+                AddPlayer(player, session);
+
+            string strSQL = "start_session(@sessionId, @serverId);";
+            using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
+            {
+                cmd.Parameters.Add("sessionId", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session;
+                cmd.Parameters.Add("serverId", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = server;
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        private void AddPlayer(int playerId, int sessionId)
+        {
+            string strSQL = "add_player_to_session(@sessionId, @playerId);";
+            using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
+            {
+                cmd.Parameters.Add("sessionId", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = sessionId;
+                cmd.Parameters.Add("playerId", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = playerId;
                 cmd.ExecuteNonQuery();
             }
         }
@@ -83,15 +109,7 @@ namespace LaunchServer.Controllers
                 using (MySqlDataReader dr = cmd.ExecuteReader())
                 {
                     cmd.Parameters.Add("username", MySqlDbType.String).Value = name;
-                    UserInfo info = new UserInfo();
-                    if (dr.Read())
-                    {
-                        info.email = dr.IsDBNull(dr.GetOrdinal("email")) ? dr.GetString("email") : "";
-                        info.userId = dr.GetUInt64("user_id");
-                        info.name = dr.GetString("username");
-                        info.registerTime = dr.IsDBNull(dr.GetOrdinal("create_time")) ? dr.GetDateTime("create_time") : null;
-                    }
-                    return info;
+                    return GetUserInfo(cmd);
                 }
             }
         }
@@ -102,18 +120,24 @@ namespace LaunchServer.Controllers
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
                 cmd.Parameters.Add("user_id", MySqlDbType.Int32).Value = id;
-                using (MySqlDataReader dr = cmd.ExecuteReader())
+                return GetUserInfo(cmd);
+            }
+        }
+
+        private UserInfo GetUserInfo(MySqlCommand cmd)
+        {
+            using (MySqlDataReader dr = cmd.ExecuteReader())
+            {
+                UserInfo info = new UserInfo();
+                if (dr.Read())
                 {
-                    UserInfo info = new UserInfo();
-                    if (dr.Read())
-                    {
-                        info.email = !dr.IsDBNull(dr.GetOrdinal("email")) ? dr.GetString("email") : "";
-                        info.userId = dr.GetUInt64("user_id");
-                        info.name = dr.GetString("username");
-                        info.registerTime = !dr.IsDBNull(dr.GetOrdinal("create_time")) ? dr.GetDateTime("create_time") : null;
-                    }
-                    return info;
+                    info.email = !dr.IsDBNull(dr.GetOrdinal("email")) ? dr.GetString("email") : "";
+                    info.userId = dr.GetUInt64("user_id");
+                    info.name = dr.GetString("username");
+                    info.registerTime = !dr.IsDBNull(dr.GetOrdinal("create_time")) ? dr.GetDateTime("create_time") : null;
+                    info.isActive = dr.GetBoolean("active_user");
                 }
+                return info;
             }
         }
 
