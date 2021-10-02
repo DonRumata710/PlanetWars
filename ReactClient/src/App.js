@@ -11,7 +11,7 @@ import Sessions from './pages/sessions'
 import './App.css'
 import userManager, { loadUserFromStorage } from './services/userService'
 import AuthProvider from './utils/authProvider'
-import ProtectedRoute from './utils/protectedRoute'
+import ProtectedRoute from './components/protectedRoute'
 import { Provider } from 'react-redux';
 import store from './store'
 
