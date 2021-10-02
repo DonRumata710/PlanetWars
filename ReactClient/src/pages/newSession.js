@@ -1,12 +1,18 @@
 import React, { Component } from 'react'
 import Page from '../components/page'
-import { createSession, getDefaultGameParameters } from '../services/launchService'
+import { createSession, getDefaultGameParameters, leaveSession, startSession } from '../services/launchService'
 import PropertyList from '../components/propertyList'
+import LinkButton from '../components/linkButton';
 
 class NewSession extends Component {
     constructor(props) {
         super(props);
         this.isSent = false;
+        this.isCreated = false;
+    }
+
+    componentWillUnmount() {
+        leaveSession();
     }
 
     getParameters() {
@@ -14,7 +20,6 @@ class NewSession extends Component {
         this.parameters.forEach(element => {
             res[element.field] = element.currentValue
         });
-        console.log(res);
         return res;
     }
 
@@ -24,7 +29,17 @@ class NewSession extends Component {
             return (
                 <Page>
                     <PropertyList properties={this.parameters} />
-                    <button onClick={() => createSession(this.getParameters()) }>Register room</button>
+                    <button onClick={() => {
+                        createSession(this.getParameters()).then((value) => {
+                            this.id = value;
+                            this.forceUpdate();
+                        });
+                    }}>Register room</button>
+                    { this.id != null &&
+                        <LinkButton to={"/game/" + this.id} onClick={() => {
+                            startSession(this.id)
+                        }}>Start game</LinkButton>
+                    }
                 </Page>
             )
         }

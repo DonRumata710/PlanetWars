@@ -15,20 +15,27 @@ namespace LaunchServer.Controllers
         public SessionsController(DatabaseService db)
         {
             database = db;
-            servers = database.ServerList();
         }
 
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok(sessions);
+            return Ok(database.GetNotStartedSessions());
         }
 
         [HttpPost]
         [Route("join")]
         public IActionResult Join(int sessionId)
         {
-            sessions[sessionId].Players.Add(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            database.AddPlayer(sessionId, Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            return Ok();
+        }
+
+        [HttpGet]
+        [Route("leave")]
+        public IActionResult Leave()
+        {
+            database.LeaveSessions(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
             return Ok();
         }
 
@@ -70,14 +77,8 @@ namespace LaunchServer.Controllers
 
             var userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            Session session = new Session
-            {
-                Parameters = param,
-                Players = new List<int>{ userId }
-            };
-
             int id = database.CreateNewSession(param);
-            sessions.Add(id, session);
+            database.AddPlayer(userId, id);
 
             return Ok(id);
         }
@@ -86,34 +87,33 @@ namespace LaunchServer.Controllers
         public IActionResult RefreshSession(int id, SessionStartParameters param)
         {
             database.RefreshSession(id, param);
-            sessions[id].Parameters = param;
             return Ok();
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("start")]
         public IActionResult StartSession(int id)
         {
             int serverId = -1;
+            string serverAddress = null;
             float minRatio = float.MaxValue;
-            foreach(var server in servers)
+            foreach(var server in database.ServerList())
             {
                 float ratio = server.Value.ActiveSessions / (float)server.Value.SessionLimit;
                 if (ratio < minRatio)
                 {
                     serverId = server.Key;
+                    serverAddress = server.Value.Address;
                     minRatio = ratio;
                 }
             }
 
-            database.StartSession(id, sessions[id].Players, serverId);
+            database.StartSession(id, serverId);
 
-            return Ok();
+            return Ok(serverAddress);
         }
 
 
         private DatabaseService database;
-        private Dictionary<int, GameServer> servers;
-        private Dictionary<int, Session> sessions = new Dictionary<int, Session>();
     }
 }

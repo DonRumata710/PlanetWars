@@ -19,6 +19,7 @@ class UserPage extends Component
                     <p>Name: {this.info.name}</p>
                     <p>E-mail: {this.info.email}</p>
                     <p>Registration date: {this.info.registerTime}</p>
+                    { !this.info.isActive && <p>Blocked user</p> }
                 </Page>
             );
         }

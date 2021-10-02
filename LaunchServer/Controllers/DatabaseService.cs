@@ -9,22 +9,83 @@ namespace LaunchServer.Controllers
 {
     public class DatabaseService
     {
-        public DatabaseService(string login, string password, string server = "localhost", int port = 3306)
+        public DatabaseService(string _login, string _password, string _server = "localhost", int _port = 3306)
         {
-            connection = new MySqlConnection("server=" + server + ";user=" + login + ";port=" + port + ";database=planetwars;password=" + password + ";");
-            connection.Open();
+            login = _login;
+            password = _password;
+            server = _server;
+            port = _port;
         }
 
-        ~DatabaseService()
+        public Dictionary<int, Session> GetNotStartedSessions()
         {
-            connection.Close();
+            return GetSessions("WHERE `start_time` IS NULL");
+        }
+
+        public Dictionary<int, Session> GetSessions()
+        {
+            return GetSessions("");
+        }
+
+        private Dictionary<int, Session> GetSessions(string limit)
+        {
+            Dictionary<int, Session> res = new Dictionary<int, Session>();
+
+            string strSQL = "SELECT * FROM `session_list` " + limit;
+            using (MySqlConnection connection = CreateConnection())
+            using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
+            {
+                connection.Open();
+                using (MySqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        SessionStartParameters parameters = new SessionStartParameters
+                        {
+                            Name = dr.GetString("name"),
+                            Description = dr.GetString("description"),
+                            Size = dr.GetInt32("size"),
+                            PlanetCount = dr.GetInt32("planet_count"),
+                            PlayerLimit = dr.GetInt32("player_limit")
+                        };
+                        int id = dr.GetInt32("id");
+                        res.Add(id, new Session
+                        {
+                            Parameters = parameters,
+                            Players = GetSessionPlayers(id)
+                        });
+                    }
+                }
+                return res;
+            }
+        }
+
+        private List<int> GetSessionPlayers(int sessionId)
+        {
+            List<int> res = new List<int>();
+
+            string strSQL = "SELECT `user_id` FROM `session_members` WHERE `session_id`=@session_id;";
+            using (MySqlConnection connection = CreateConnection())
+            using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
+            {
+                connection.Open();
+                cmd.Parameters.Add("session_id", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = sessionId;
+                using (MySqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                        res.Add(dr.GetInt32("user_id"));
+                }
+                return res;
+            }
         }
 
         public int CreateNewSession(SessionStartParameters session)
         {
             string strSQL = "create_session";
+            using (MySqlConnection connection = CreateConnection())
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
+                connection.Open();
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
                 cmd.Parameters.Add("sessionName", MySql.Data.MySqlClient.MySqlDbType.VarChar).Value = session.Name;
                 cmd.Parameters.Add("sessionDescription", MySql.Data.MySqlClient.MySqlDbType.VarChar).Value = session.Description;
@@ -42,8 +103,10 @@ namespace LaunchServer.Controllers
         public void RefreshSession(int id, SessionStartParameters session)
         {
             string strSQL = "UPDATE `session_list` SET `name`=@name, `description`=@description, `size`=@size, `planet_count`=@planet_count, `player_count`=@player_count;";
+            using (MySqlConnection connection = CreateConnection())
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
+                connection.Open();
                 cmd.Parameters.Add("name", MySql.Data.MySqlClient.MySqlDbType.VarChar).Value = session.Name;
                 cmd.Parameters.Add("description", MySql.Data.MySqlClient.MySqlDbType.VarChar).Value = session.Description;
                 cmd.Parameters.Add("size", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session.Size;
@@ -56,26 +119,52 @@ namespace LaunchServer.Controllers
             }
         }
 
-        public void StartSession(int session, List<int> players, int server)
+        public void StartSession(int session, int server)
         {
-            foreach (int player in players)
-                AddPlayer(player, session);
-
             string strSQL = "call start_session(@sessionId, @serverId);";
+            using (MySqlConnection connection = CreateConnection())
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
+                connection.Open();
                 cmd.Parameters.Add("sessionId", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = session;
                 cmd.Parameters.Add("serverId", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = server;
                 cmd.ExecuteNonQuery();
             }
         }
 
-        private void AddPlayer(int playerId, int sessionId)
+        public void AddPlayer(int playerId, int sessionId)
         {
             string strSQL = "call add_player_to_session(@sessionId, @playerId);";
+            using (MySqlConnection connection = CreateConnection())
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
+                connection.Open();
                 cmd.Parameters.Add("sessionId", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = sessionId;
+                cmd.Parameters.Add("playerId", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = playerId;
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void RemovePlayer(int playerId, int sessionId)
+        {
+            string strSQL = "call remove_player_from_session(@sessionId, @playerId);";
+            using (MySqlConnection connection = CreateConnection())
+            using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
+            {
+                connection.Open();
+                cmd.Parameters.Add("sessionId", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = sessionId;
+                cmd.Parameters.Add("playerId", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = playerId;
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void LeaveSessions(int playerId)
+        {
+            string strSQL = "call leave_all_sessions(@playerId);";
+            using (MySqlConnection connection = CreateConnection())
+            using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
+            {
+                connection.Open();
                 cmd.Parameters.Add("playerId", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = playerId;
                 cmd.ExecuteNonQuery();
             }
@@ -84,14 +173,17 @@ namespace LaunchServer.Controllers
         public Dictionary<int, GameServer> ServerList()
         {
             string strSQL = "SELECT * FROM `server_list`";
+            using (MySqlConnection connection = CreateConnection())
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
+                connection.Open();
                 using (MySqlDataReader dr = cmd.ExecuteReader())
                 {
                     Dictionary<int, GameServer> res = new Dictionary<int, GameServer>();
                     while (dr.Read())
                     {
                         GameServer serverModel = new GameServer();
+                        serverModel.Address = dr.GetString("address");
                         serverModel.ActiveSessions = 0;
                         serverModel.SessionLimit = dr.GetInt32("session_limit");
                         res.Add(dr.GetInt32("server_id"), serverModel);
@@ -104,21 +196,22 @@ namespace LaunchServer.Controllers
         public UserInfo GetUserInfo(string name)
         {
             string strSQL = "SELECT * FROM `user_list` WHERE `username`=@username";
+            using (MySqlConnection connection = CreateConnection())
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
-                using (MySqlDataReader dr = cmd.ExecuteReader())
-                {
-                    cmd.Parameters.Add("username", MySqlDbType.String).Value = name;
-                    return GetUserInfo(cmd);
-                }
+                connection.Open();
+                cmd.Parameters.Add("username", MySqlDbType.String).Value = name;
+                return GetUserInfo(cmd);
             }
         }
 
         public UserInfo GetUserInfo(int id)
         {
             string strSQL = "SELECT * FROM `user_list` WHERE `user_id`=@user_id";
+            using (MySqlConnection connection = CreateConnection())
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
+                connection.Open();
                 cmd.Parameters.Add("user_id", MySqlDbType.Int32).Value = id;
                 return GetUserInfo(cmd);
             }
@@ -126,8 +219,10 @@ namespace LaunchServer.Controllers
 
         private UserInfo GetUserInfo(MySqlCommand cmd)
         {
+            using (MySqlConnection connection = CreateConnection())
             using (MySqlDataReader dr = cmd.ExecuteReader())
             {
+                connection.Open();
                 UserInfo info = new UserInfo();
                 if (dr.Read())
                 {
@@ -141,6 +236,14 @@ namespace LaunchServer.Controllers
             }
         }
 
-        private MySqlConnection connection;
+        private MySqlConnection CreateConnection()
+        {
+            return new MySqlConnection("server=" + server + ";user=" + login + ";port=" + port + ";database=planetwars;password=" + password + ";");
+        }
+
+        private string server;
+        private string login;
+        private int port;
+        private string password;
     }
 }

@@ -12,15 +12,15 @@ async function getSessions() {
 }
 
 async function joinSession(sessionId) {
-  await axios.post(sessionController + '/join',
-    { params: { sessionId } }
-  );
+  await axios.post(sessionController + '/join', { params: { sessionId } });
+}
+
+async function leaveSession() {
+  await axios.get(sessionController + '/leave');
 }
 
 async function createSession(param) {
-    const response = await axios.post(sessionController,
-      param
-    );
+    const response = await axios.post(sessionController, param);
     return response.data;
 }
 
@@ -30,27 +30,23 @@ async function getDefaultGameParameters() {
 }
 
 async function updateSession(sessionId, params) {
-  await axios.put(sessionController,
-    { sessionId, params }
-  );
+  await axios.put(sessionController, { sessionId, params });
 }
 
 async function startSession(id) {
-  await axios.post(sessionController + '/start',
-    { params: { id } }
-  )
+  const response = await axios.get(sessionController + '/start', { params: { id } })
+  return response.data;
 }
 
 async function getUserInfo(username) {
-  const response = await axios.get(userController,
-    { params: { username } }
-  );
+  const response = await axios.get(userController, { params: { username } });
   return response.data;
 }
 
 export {
     getSessions,
     joinSession,
+    leaveSession,
     createSession,
     getDefaultGameParameters,
     updateSession,
