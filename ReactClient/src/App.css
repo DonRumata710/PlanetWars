@@ -2,6 +2,11 @@
   text-align: center;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
 button {
   padding: 10px;
   padding-left: 15px;
@@ -50,6 +55,28 @@ button.header-widget {
   margin-left: auto;
   margin-right: auto;
   padding-top: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.app-content > * {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.claim {
+  width: calc(100% - 10px);
+  background-color: #64A8D1;
+  padding: 5px;
+  padding-left: 10px;
+}
+
+.claim > h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+}
+
+.claim:hover {
+  background-color: #0969A2;
 }
 
 a {
