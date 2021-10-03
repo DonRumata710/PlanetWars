@@ -14,6 +14,7 @@ import AuthProvider from './utils/authProvider'
 import ProtectedRoute from './components/protectedRoute'
 import { Provider } from 'react-redux';
 import store from './store'
+import Session from './pages/session'
 
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
             <Route path="/signin-oidc" component={SigninOidc} />
             <ProtectedRoute exact path='/' component={Home} />
             <ProtectedRoute path='/new-session' component={NewSession} />
+            <ProtectedRoute path='/session/:sessionId?' component={Session} />
             <ProtectedRoute path='/sessions' component={Sessions} />
             <ProtectedRoute path='/game/:sessionId?' component={GamePage} />
             <ProtectedRoute path='/user/:userId?' component={UserPage} />

@@ -1,16 +1,22 @@
 import React, { Component } from 'react'
 import Page from '../components/page'
-import { createSession, getDefaultGameParameters } from '../services/launchService'
+import { getSession, joinSession, leaveSession, startSession } from '../services/launchService'
 import PropertyList from '../components/propertyList'
 import LinkButton from '../components/linkButton';
 
-class NewSession extends Component {
+class Session extends Component {
     constructor(props) {
         super(props);
-        console.log(props)
         this.isSent = false;
-        this.isCreated = false;
-        this.id = props.match.params.id;
+        this.id = props.match.params.sessionId;
+    }
+
+    componentDidMount() {
+        joinSession(this.id); 
+    }
+
+    componentWillUnmount() {
+        leaveSession();
     }
 
     getParameters() {
@@ -27,13 +33,13 @@ class NewSession extends Component {
                 field: "Name",
                 name: "Name",
                 type: "text",
-                currentValue: ""
+                currentValue: parameters.name
             },
             {
                 field: "Description",
                 name: "Description",
                 type: "text",
-                currentValue: ""
+                currentValue: parameters.description
             },
             {
                 field: "PlanetCount",
@@ -63,14 +69,9 @@ class NewSession extends Component {
             return (
                 <Page>
                     <PropertyList properties={this.parameters} />
-                    <LinkButton to={"/session/" + this.id} onClick={() => {
-                            createSession(this.getParameters()).then((value) => {
-                                this.id = value;
-                                this.forceUpdate();
-                            });
-                        }}>
-                            Register room
-                    </LinkButton>
+                        <LinkButton to={"/game/" + this.id} onClick={() => {
+                            startSession(this.id)
+                        }}>Start game</LinkButton>
                 </Page>
             )
         }
@@ -78,8 +79,8 @@ class NewSession extends Component {
         {
             if (!this.isSent)
             {
-                getDefaultGameParameters().then((parameters) => {
-                    this.applyParameters(parameters)
+                getSession(this.id).then((session) => {
+                    this.applyParameters(session.parameters)
                 });
                 this.isSent = true;
             }
@@ -91,4 +92,4 @@ class NewSession extends Component {
     }
 }
 
-export default NewSession
+export default Session
