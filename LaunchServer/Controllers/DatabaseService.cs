@@ -17,6 +17,31 @@ namespace LaunchServer.Controllers
             port = _port;
         }
 
+        public Session GetSession(int id)
+        {
+            string strSQL = "SELECT * FROM `session_list` WHERE `id`=@id;";
+            using (MySqlConnection connection = CreateConnection())
+            using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
+            {
+                connection.Open();
+                cmd.Parameters.Add("id", MySql.Data.MySqlClient.MySqlDbType.Int32).Value = id;
+                using (MySqlDataReader dr = cmd.ExecuteReader())
+                {
+                    if (dr.Read())
+                    {
+                        SessionStartParameters parameters = GetSessionParameters(dr);
+                        return new Session
+                        {
+                            Parameters = parameters,
+                            Players = GetSessionPlayers(id)
+                        };
+                    }
+                }
+            }
+
+            throw new Exception("Failed get session information");
+        }
+
         public Dictionary<int, Session> GetNotStartedSessions()
         {
             return GetSessions("WHERE `start_time` IS NULL");
@@ -40,14 +65,7 @@ namespace LaunchServer.Controllers
                 {
                     while (dr.Read())
                     {
-                        SessionStartParameters parameters = new SessionStartParameters
-                        {
-                            Name = dr.GetString("name"),
-                            Description = dr.GetString("description"),
-                            Size = dr.GetInt32("size"),
-                            PlanetCount = dr.GetInt32("planet_count"),
-                            PlayerLimit = dr.GetInt32("player_limit")
-                        };
+                        SessionStartParameters parameters = GetSessionParameters(dr);
                         int id = dr.GetInt32("id");
                         res.Add(id, new Session
                         {
@@ -58,6 +76,18 @@ namespace LaunchServer.Controllers
                 }
                 return res;
             }
+        }
+
+        private SessionStartParameters GetSessionParameters(MySqlDataReader dr)
+        {
+            return new SessionStartParameters
+            {
+                Name = dr.GetString("name"),
+                Description = dr.GetString("description"),
+                Size = dr.GetInt32("size"),
+                PlanetCount = dr.GetInt32("planet_count"),
+                PlayerLimit = dr.GetInt32("player_count")
+            };
         }
 
         private List<int> GetSessionPlayers(int sessionId)

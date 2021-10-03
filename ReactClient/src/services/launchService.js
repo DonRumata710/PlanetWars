@@ -11,8 +11,13 @@ async function getSessions() {
   return response.data;
 }
 
+async function getSession(id) {
+  const response = await axios.get(sessionController, { params: { id } });
+  return response.data;
+}
+
 async function joinSession(sessionId) {
-  await axios.post(sessionController + '/join', { params: { sessionId } });
+  await axios.get(sessionController + '/join', { params: { sessionId } });
 }
 
 async function leaveSession() {
@@ -45,6 +50,7 @@ async function getUserInfo(username) {
 
 export {
     getSessions,
+    getSession,
     joinSession,
     leaveSession,
     createSession,

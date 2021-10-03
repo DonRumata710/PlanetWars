@@ -18,16 +18,19 @@ namespace LaunchServer.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public IActionResult Get(int? id)
         {
-            return Ok(database.GetNotStartedSessions());
+            if (id.HasValue)
+                return Ok(database.GetSession(id.Value));
+            else
+                return Ok(database.GetNotStartedSessions());
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("join")]
         public IActionResult Join(int sessionId)
         {
-            database.AddPlayer(sessionId, Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            database.AddPlayer(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)), sessionId);
             return Ok();
         }
 
