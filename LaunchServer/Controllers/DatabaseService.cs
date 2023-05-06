@@ -36,6 +36,7 @@ namespace LaunchServer.Controllers
                             Players = GetSessionPlayers(id)
                         };
                     }
+                    dr.Close();
                 }
             }
 
@@ -73,6 +74,7 @@ namespace LaunchServer.Controllers
                             Players = GetSessionPlayers(id)
                         });
                     }
+                    dr.Close();
                 }
                 return res;
             }
@@ -104,6 +106,7 @@ namespace LaunchServer.Controllers
                 {
                     while (dr.Read())
                         res.Add(dr.GetInt32("user_id"));
+                    dr.Close();
                 }
                 return res;
             }
@@ -218,6 +221,7 @@ namespace LaunchServer.Controllers
                         serverModel.SessionLimit = dr.GetInt32("session_limit");
                         res.Add(dr.GetInt32("server_id"), serverModel);
                     }
+                    dr.Close();
                     return res;
                 }
             }
@@ -262,6 +266,7 @@ namespace LaunchServer.Controllers
                     info.registerTime = !dr.IsDBNull(dr.GetOrdinal("create_time")) ? dr.GetDateTime("create_time") : null;
                     info.isActive = dr.GetBoolean("active_user");
                 }
+                dr.Close();
                 return info;
             }
         }

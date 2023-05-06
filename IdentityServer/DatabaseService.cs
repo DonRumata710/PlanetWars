@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using System.Security.Cryptography;
+
 using MySql.Data.MySqlClient;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Text;
 
 namespace IdentityServer
 {
@@ -137,7 +141,7 @@ namespace IdentityServer
         {
             List<User> users = new List<User>();
             string sort = " ORDER BY ";
-            if (sortOrder != null && sortOrder != String.Empty)
+            if (sortOrder != null && sortOrder != System.String.Empty)
             {
                 sort += "`" + sortOrder + "`";
                 if (descending) sort += " DESC";
@@ -179,7 +183,9 @@ namespace IdentityServer
 
         public bool CompareCredentials(string password, string hash)
         {
-            return hash == crypto.Security.ComputeHash(password, "0123456789ABCDEF");
+            SHA256 sha256 = SHA256.Create();
+            byte[] passwordHash = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+            return Convert.FromBase64String(hash).SequenceEqual(passwordHash);
         }
 
         public bool ValidateCredentials(string user, string password)

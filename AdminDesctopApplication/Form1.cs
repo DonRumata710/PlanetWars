@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -37,7 +38,13 @@ namespace AdminDesctopApplication
             AddUserForm form = new AddUserForm();
             if (form.ShowDialog() == DialogResult.OK)
             {
-                user_listTableAdapter.Insert(form.username(), form.email(), crypto.Security.ComputeHash(form.password(), "0123456789ABCDEF"));
+                byte[] bytes = Encoding.UTF8.GetBytes(form.password());
+
+                SHA256 sha256ToCheck = SHA256.Create();
+                byte[] hash = sha256ToCheck.ComputeHash(bytes);
+                string hex = Convert.ToBase64String(hash);
+
+                user_listTableAdapter.Insert(form.username(), form.email(), hex);
                 UpdateUserList();
             }
         }

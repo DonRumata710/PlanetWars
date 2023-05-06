@@ -7,6 +7,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Serilog;
 
 namespace LaunchServer
 {
@@ -14,6 +15,8 @@ namespace LaunchServer
     {
         public static void Main(string[] args)
         {
+            Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+
             CreateWebHostBuilder(args).Build().Run();
         }
 

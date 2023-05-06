@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Interfaces.Models;
 using System.Security.Claims;
+using Serilog;
+using MySqlX.XDevAPI;
 
 namespace LaunchServer.Controllers
 {
@@ -30,7 +32,10 @@ namespace LaunchServer.Controllers
         [Route("join")]
         public IActionResult Join(int sessionId)
         {
-            database.AddPlayer(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)), sessionId);
+            Int32 userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            Log.Information("User " + userId.ToString() + " joined to session " + sessionId.ToString());
+
+            database.AddPlayer(userId, sessionId);
             return Ok();
         }
 
@@ -38,7 +43,10 @@ namespace LaunchServer.Controllers
         [Route("leave")]
         public IActionResult Leave()
         {
-            database.LeaveSessions(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            Int32 userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            Log.Information("User " + userId.ToString() + " leaves session");
+
+            database.LeaveSessions(userId);
             return Ok();
         }
 
@@ -79,6 +87,7 @@ namespace LaunchServer.Controllers
                 return StatusCode(422);
 
             var userId = Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            Log.Information("User " + userId.ToString() + " creates session");
 
             int id = database.CreateNewSession(param);
             database.AddPlayer(userId, id);
