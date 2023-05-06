@@ -90,7 +90,6 @@ namespace LaunchServer.Controllers
             Log.Information("User " + userId.ToString() + " creates session");
 
             int id = database.CreateNewSession(param);
-            database.AddPlayer(userId, id);
 
             return Ok(id);
         }
