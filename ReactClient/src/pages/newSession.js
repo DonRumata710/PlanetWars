@@ -10,7 +10,6 @@ class NewSession extends Component {
         console.log(props)
         this.isSent = false;
         this.isCreated = false;
-        this.id = props.match.params.id;
     }
 
     getParameters() {
@@ -63,11 +62,9 @@ class NewSession extends Component {
             return (
                 <Page>
                     <PropertyList properties={this.parameters} />
-                    <LinkButton to={"/session/" + this.id} onClick={() => {
-                            createSession(this.getParameters()).then((value) => {
-                                this.id = value;
-                                this.forceUpdate();
-                            });
+                    <LinkButton onClick={async () => {
+                            this.id = await createSession(this.getParameters())
+                            return "/session/" + this.id
                         }}>
                             Register room
                     </LinkButton>

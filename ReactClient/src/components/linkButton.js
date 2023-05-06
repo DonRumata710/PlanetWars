@@ -16,9 +16,15 @@ const LinkButton = (props) => {
   return (
     <button
       {...rest} // `children` is just another prop!
-      onClick={(event) => {
-        onClick && onClick(event)
-        history.push(to)
+      onClick={async (event) => {
+        var link = to
+        if (onClick)
+        {
+          var newLink = await onClick(event)
+          if (newLink)
+            link = newLink
+        }
+        history.push(link)
       }}
     />
   )

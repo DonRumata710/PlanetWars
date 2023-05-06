@@ -116,7 +116,6 @@ namespace LaunchServer.Controllers
             return Ok(serverAddress);
         }
 
-
         private DatabaseService database;
     }
 }

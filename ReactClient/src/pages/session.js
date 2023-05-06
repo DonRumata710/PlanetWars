@@ -7,16 +7,22 @@ import LinkButton from '../components/linkButton';
 class Session extends Component {
     constructor(props) {
         super(props);
-        this.isSent = false;
         this.id = props.match.params.sessionId;
     }
 
     componentDidMount() {
-        joinSession(this.id); 
+        joinSession(this.id);
+        setTimeout(this.loadData, 6000);
     }
 
     componentWillUnmount() {
         leaveSession();
+    }
+
+    loadData() {
+        getSession(this.id).then((session) => {
+            this.applyParameters(session.parameters)
+        });
     }
 
     getParameters() {
@@ -69,22 +75,14 @@ class Session extends Component {
             return (
                 <Page>
                     <PropertyList properties={this.parameters} />
-                        <LinkButton to={"/game/" + this.id} onClick={() => {
-                            startSession(this.id)
-                        }}>Start game</LinkButton>
+                    <LinkButton to={"/game/" + this.id} onClick={() => startSession(this.id) }>
+                        Start game
+                    </LinkButton>
                 </Page>
             )
         }
         else
         {
-            if (!this.isSent)
-            {
-                getSession(this.id).then((session) => {
-                    this.applyParameters(session.parameters)
-                });
-                this.isSent = true;
-            }
-
             return (
                 <Page />
             )
