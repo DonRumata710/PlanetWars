@@ -30,6 +30,8 @@ class UserPage extends Component
                 getUserInfo(this.username).then((value) => {
                     this.info = value;
                     this.forceUpdate();
+                }).catch((reason) => {
+                    console.log("getUserInfo failed ", reason)
                 });
                 this.isSent = true;
             }

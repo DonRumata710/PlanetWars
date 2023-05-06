@@ -45,6 +45,14 @@ namespace LaunchServer.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("{id:int:min(1)}")]
+        public IActionResult GetName(int id)
+        {
+            UserInfo userInfo = database.GetUserInfo(id);
+            return Ok(userInfo.name);
+        }
+
         private DatabaseService database;
     }
 }
