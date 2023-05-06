@@ -3,7 +3,6 @@ import { storeUser } from '../actions/authActions'
 import { setAuthHeader } from './axiosHeaders';
 
 export default function AuthProvider({ userManager: manager, store, children }) {
-
   let userManager = useRef();
 
   useEffect(() => {
@@ -25,6 +24,7 @@ export default function AuthProvider({ userManager: manager, store, children }) 
 
     const onAccessTokenExpired = () => {
       console.log(`user token expired`)
+      store.dispatch(storeUser(null))
     }
 
     const onUserSignedOut = () => {

@@ -8,7 +8,8 @@ import {
 import { setAuthHeader } from '../utils/axiosHeaders'
 
 export function storeUser(user) {
-  setAuthHeader(user.access_token)
+  if (user)
+    setAuthHeader(user.access_token)
   return {
     type: STORE_USER,
     payload: user
