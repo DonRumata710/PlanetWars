@@ -83,3 +83,34 @@ a {
   color: #510FAD;
   text-decoration: none;
 }
+
+.board {
+  display: flex;
+  flex-direction: column;
+  overflow: none;
+  padding: 0;
+}
+
+.board > * {
+  line-height: 0;
+}
+
+.board_row {
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.cell {
+  background-color: black;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+}
+
+.cell > img {
+  max-width: 40px;
+  max-height: 40px;
+  margin: 0;
+}

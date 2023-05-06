@@ -77,6 +77,8 @@ class NewSession extends Component {
             {
                 getDefaultGameParameters().then((parameters) => {
                     this.applyParameters(parameters)
+                }).catch((reason) => {
+                    console.log("getDefaultGameParameters failed ", reason)
                 });
                 this.isSent = true;
             }

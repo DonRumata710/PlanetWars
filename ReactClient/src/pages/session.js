@@ -12,7 +12,7 @@ class Session extends Component {
 
     componentDidMount() {
         joinSession(this.id);
-        setTimeout(this.loadData, 6000);
+        this.loadData();
     }
 
     componentWillUnmount() {
@@ -22,6 +22,8 @@ class Session extends Component {
     loadData() {
         getSession(this.id).then((session) => {
             this.applyParameters(session.parameters)
+        }).catch((reason) => {
+            console.log("getSession failed ", reason)
         });
     }
 
