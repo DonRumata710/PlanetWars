@@ -43,6 +43,8 @@ class Sessions extends Component {
                         <Session key={key} id={key} name={sessions[key].parameters.name} description={sessions[key].parameters.description} />
                     );
                     this.forceUpdate();
+                }).catch((reason) => {
+                    console.log("get session list failed ", reason)
                 });
 
                 this.isSent = true;

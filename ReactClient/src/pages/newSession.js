@@ -7,7 +7,6 @@ import LinkButton from '../components/linkButton';
 class NewSession extends Component {
     constructor(props) {
         super(props);
-        console.log(props)
         this.isSent = false;
         this.isCreated = false;
     }
