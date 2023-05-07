@@ -4,7 +4,7 @@ using System.Threading;
 using System.IO;
 
 
-namespace Server
+namespace GameServer
 {
     public class ConnectionManager
     {/*

@@ -6,10 +6,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-using Server.GameLogic;
+using GameServer.GameLogic;
 
 
-namespace Server
+namespace GameServer
 {
     public class Room
     {

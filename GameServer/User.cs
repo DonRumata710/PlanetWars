@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using System.Net.WebSockets;
 
 
-using Server.GameLogic;
+using GameServer.GameLogic;
 
 using Newtonsoft.Json;
 
-namespace Server
+namespace GameServer
 {
     public class User// : WebSocketBehavior
     {/*
