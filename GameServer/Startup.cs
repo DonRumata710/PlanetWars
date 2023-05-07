@@ -48,6 +48,7 @@ namespace CommonLibrary
                 });
 
             services.AddSingleton<DatabaseService>(new DatabaseService(Configuration.GetValue<int>("id"), Configuration.GetValue<string>("login"), Configuration.GetValue<string>("password")));
+            services.AddSingleton<GameManager>(new GameManager());
 
             services.AddHostedService<LifetimeManager>();
 

@@ -4,25 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Interfaces.Models;
 using Newtonsoft.Json;
 
 using GameServer.GameLogic;
-
+using GameServer.Models;
 
 namespace GameServer
 {
     public class Room
     {
-        public Room(string _name, int _size, int _maxPlayers, int _planets)
+        public Room(Session sessionParameters)
         {
-            Name = _name;
-            Size = _size;
-            MaxPlayers = _maxPlayers;
+            Name = sessionParameters.Parameters.Name;
+            Size = sessionParameters.Parameters.Size;
 
-            planets = new Dictionary<GameLogic.Coordinates, GameLogic.Planet>(_planets);
+            planets = new Dictionary<GameLogic.Coordinates, GameLogic.Planet>();
 
             ThreadSafeRandom rnd = new ThreadSafeRandom();
-            for (int i = 0; i < _planets; ++i)
+            for (int i = 0; i < sessionParameters.Parameters.PlanetCount; ++i)
             {
                 GameLogic.Coordinates coord;
                 do
@@ -31,30 +31,6 @@ namespace GameServer
 
                 planets.Add(coord, new GameLogic.Planet(rnd.Next(Size) + 1, i));
             }
-        }
-
-        public int AddPlayer(Player player)
-        {
-            Monitor.Enter(this);
-
-            players.Add(player);
-
-            NewPlayer?.Invoke(Name);
-
-            if (players.Count == MaxPlayers)
-            {
-                players[CurrentPlayer].StartStep(CalcPlanetIncome(CurrentPlayer));
-            }
-            Monitor.Exit(this);
-
-            return players.Count - 1;
-        }
-
-        public void RemovePlayer(Player player)
-        {
-            players.Remove(player);
-            if (players.Count == 0 && GameFinish != null)
-                GameFinish(Name);
         }
 
         public int GetId(Player player)
@@ -67,21 +43,35 @@ namespace GameServer
             return -1;
         }
 
-        public override string ToString()
+        public GameState ToGameState()
         {
-            return String.Format("name={0},size={1},players={2},maxplayers={3};", Name, Size, players.Count, MaxPlayers);
+            GameState state = new GameState();
+            state.Size = Size;
+            state.Planets = new List<GameState.Planet>(planets.Count);
+            foreach(KeyValuePair<Coordinates, Planet> planet in planets)
+            {
+                GameState.Planet planetState = new GameState.Planet();
+                planetState.Size = planet.Value.Size;
+                planetState.x = planet.Key.x;
+                planetState.y = planet.Key.y;
+                planetState.Id = planet.Key.x + planet.Key.y * Size;
+                planetState.Type = planet.Value.Size;
+                state.Planets.Add(planetState);
+            }
+
+            return state;
         }
 
-        public bool IsFull()
+        public override string ToString()
         {
-            return MaxPlayers == players.Count;
+            return String.Format("name={0},size={1},players={2}", Name, Size, players.Count);
         }
 
 
         public void MakeStep(int player)
         {
             players[CurrentPlayer].StopStep();
-            CurrentPlayer = (CurrentPlayer + 1) % MaxPlayers;
+            CurrentPlayer = (CurrentPlayer + 1) % PlayerNumber;
 
             players[CurrentPlayer].StartStep(CalcPlanetIncome(CurrentPlayer));
         }
@@ -142,7 +132,6 @@ namespace GameServer
 
         public string Name { get; } = "";
         public int Size { get; } = 0;
-        public int MaxPlayers { get; } = 0;
         public int CurrentPlayer { get; private set; } = 0;
         public int PlayerNumber { get { return players.Count; } }
     }

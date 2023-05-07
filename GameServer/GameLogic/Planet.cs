@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace Server.GameLogic
+namespace GameServer.GameLogic
 {
     public struct Coordinates
     {
@@ -60,14 +60,14 @@ namespace Server.GameLogic
     {
         public Planet(int _size, int owner)
         {
-            size = _size;
+            Size = _size;
             Owner = owner;
             Guardians = new Fleet(owner, this);
         }
 
         public override string ToString()
         {
-            return "owner=" + Owner.ToString() + "size=" + size.ToString() + ",mi=" + MilitaryIndustryLevel
+            return "owner=" + Owner.ToString() + "size=" + Size.ToString() + ",mi=" + MilitaryIndustryLevel
                 + ",ci=" + CivilIndustryLevel + ",s=" + ScienceLevel + ";";
         }
 
@@ -75,7 +75,7 @@ namespace Server.GameLogic
         {
             string res = "{";
 
-            res += "\"Owner\":" + Owner.ToString() + ",\"size\":" + size.ToString();
+            res += "\"Owner\":" + Owner.ToString() + ",\"size\":" + Size.ToString();
 
             return res + "}";
         }
@@ -111,9 +111,9 @@ namespace Server.GameLogic
 
         public int prepareStep()
         {
-            Guardians.AddShips((int)science, (int)military_industry * size);
+            Guardians.AddShips((int)science, (int)military_industry * Size);
 
-            return ((int)civil_industry) * size;
+            return ((int)civil_industry) * Size;
         }
 
 
@@ -152,7 +152,7 @@ namespace Server.GameLogic
         }
 
         [JsonProperty]
-        int size = 0;
+        public int Size { get; private set; } = 0;
 
         double military_industry = 1.0;
 
