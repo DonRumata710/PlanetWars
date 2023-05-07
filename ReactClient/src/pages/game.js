@@ -60,7 +60,7 @@ class Board extends Component
         return (
             <div className="board">
                 {this.cells.map((row) =>
-                    <div className="board-row">
+                    <div className="board_row">
                         {row.map((cell) =>
                             cell
                         )}
