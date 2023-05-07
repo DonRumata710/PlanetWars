@@ -3,6 +3,8 @@ import Page from '../components/page'
 import { getSession, joinSession, leaveSession, startSession } from '../services/launchService'
 import PropertyList from '../components/propertyList'
 import LinkButton from '../components/linkButton';
+import { setGameServiceAddress } from '../services/gameService'
+
 
 class Session extends Component {
     constructor(props) {
@@ -77,7 +79,7 @@ class Session extends Component {
             return (
                 <Page>
                     <PropertyList properties={this.parameters} />
-                    <LinkButton to={"/game/" + this.id} onClick={() => startSession(this.id) }>
+                    <LinkButton to={"/game/" + this.id} onClick={async () => setGameServiceAddress(await startSession(this.id))}>
                         Start game
                     </LinkButton>
                 </Page>

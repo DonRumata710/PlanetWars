@@ -14,7 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-
+using GameServer;
+using GameServer.Controllers;
 
 namespace CommonLibrary
 {
@@ -45,6 +46,10 @@ namespace CommonLibrary
                     // the scope id of this api
                     options.Audience = "planetwarapi";
                 });
+
+            services.AddSingleton<DatabaseService>(new DatabaseService(Configuration.GetValue<int>("id"), Configuration.GetValue<string>("login"), Configuration.GetValue<string>("password")));
+
+            services.AddHostedService<LifetimeManager>();
 
             services.AddMvcCore(options => {
                 options.EnableEndpointRouting = false;

@@ -1,10 +1,10 @@
 CREATE DATABASE  IF NOT EXISTS `planetwars` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
 USE `planetwars`;
--- MySQL dump 10.13  Distrib 8.0.25, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.32, for Win64 (x86_64)
 --
 -- Host: localhost    Database: planetwars
 -- ------------------------------------------------------
--- Server version	8.0.25
+-- Server version	8.0.32
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -46,6 +46,7 @@ CREATE TABLE `server_list` (
   `server_id` int NOT NULL AUTO_INCREMENT,
   `address` varchar(45) NOT NULL,
   `session_limit` int unsigned NOT NULL,
+  `status` tinyint DEFAULT '0',
   PRIMARY KEY (`server_id`),
   UNIQUE KEY `server_id_UNIQUE` (`server_id`),
   UNIQUE KEY `address_UNIQUE` (`address`)

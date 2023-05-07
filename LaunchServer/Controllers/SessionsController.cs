@@ -119,9 +119,15 @@ namespace LaunchServer.Controllers
                 }
             }
 
-            database.StartSession(id, serverId);
-
-            return Ok(serverAddress);
+            if (serverId >= 0)
+            {
+                database.StartSession(id, serverId);
+                return Ok(serverAddress);
+            }
+            else
+            {
+                return NotFound("No apropriate servers");
+            }
         }
 
         private DatabaseService database;

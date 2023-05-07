@@ -205,7 +205,7 @@ namespace LaunchServer.Controllers
 
         public Dictionary<int, GameServer> ServerList()
         {
-            string strSQL = "SELECT * FROM `server_list`";
+            string strSQL = "SELECT * FROM `server_list` WHERE `status`=1";
             using (MySqlConnection connection = CreateConnection())
             using (MySqlCommand cmd = new MySqlCommand(strSQL, connection))
             {
