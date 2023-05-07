@@ -20,9 +20,16 @@ const LinkButton = (props) => {
         var link = to
         if (onClick)
         {
-          var newLink = await onClick(event)
-          if (newLink)
-            link = newLink
+          if (link === undefined)
+          {
+            var newLink = await onClick(event)
+            if (newLink)
+              link = newLink
+          }
+          else
+          {
+            onClick(event)
+          }
         }
         history.push(link)
       }}
@@ -31,7 +38,6 @@ const LinkButton = (props) => {
 }
 
 LinkButton.propTypes = {
-  to: PropTypes.string.isRequired,
   children: PropTypes.node.isRequired
 }
 
