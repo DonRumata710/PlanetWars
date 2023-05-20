@@ -63,7 +63,10 @@ class NewSession extends Component {
                     <PropertyList properties={this.parameters} />
                     <LinkButton onClick={async () => {
                             this.id = await createSession(this.getParameters())
-                            return "/session/" + this.id
+                            return {
+                                pathname: "/session/" + this.id,
+                                state: this.parameters
+                            }
                         }}>
                             Register room
                     </LinkButton>
